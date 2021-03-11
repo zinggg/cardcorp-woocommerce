@@ -168,7 +168,7 @@ function init_woocommerce_zing()
 					'title' 		=> 'Description',
 					'type' 			=> 'text',
 					'description' 	=> 'This controls the description which the user sees during checkout',
-					'default' 		=> 'Payments proccessed by Zing.gg',
+					'default' 		=> 'Payments processed by Zing.gg',
 					'desc_tip'    	=> true
 				),
 				'test_credentials' => array(

@@ -264,7 +264,7 @@ function init_woocommerce_zing()
 
 			if (isset($this->cards_supported) && '' !== $this->cards_supported) {
 				foreach ($this->cards_supported as $card) {
-					$icons = plugins_url() . '/woocommerce-gateway-zing/assets/images/general/' . strtolower($card) . '.svg';
+					$icons = plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/' . strtolower($card) . '.svg';
 					$icon_html .= '<img src="' . $icons . '" alt="' . strtolower($card) . '" title="' . strtolower($card) . '" style="height:30px; margin:5px 0px 5px 10px; vertical-align: middle; float: none; display: inline; text-align: right;" />';
 				}
 			}
@@ -410,7 +410,7 @@ function init_woocommerce_zing()
 
 <?php
 					// ICON
-					// <div id=\"d3\"><img border=\"0\" src=\"' . plugins_url() . '/woocommerce-gateway-zing/assets/images/general/zing-gg-dark.svg\" alt=\"Secure Payment\"></div>
+					// <div id=\"d3\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/zing-gg-dark.svg\" alt=\"Secure Payment\"></div>
 					$lang = strtolower(substr(get_bloginfo('language'), 0, 2));
 					echo '<script src="' . $this->zing_url . '/v1/paymentWidgets.js?checkoutId=' . $status->id . '"></script>';
 					echo '<script src="https://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>';
@@ -434,7 +434,7 @@ function init_woocommerce_zing()
 
 							$("button[data-action=show-initial-forms]").html("Use Another Card"); 
 							
-					        var BannerHtml = "<div id=\"banner\"><div id=\"d1\"><img border=\"0\" src=\"' . plugins_url() . '/woocommerce-gateway-zing/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/woocommerce-gateway-zing/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div></div>";
+					        var BannerHtml = "<div id=\"banner\"><div id=\"d1\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div></div>";
 						    $("form.wpwl-form-card").find(".wpwl-group-submit").after(BannerHtml);
 						    $(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
 							var visa = $(".wpwl-brand:first").clone().removeAttr("class").attr("class", "wpwl-brand-card wpwl-brand-custom wpwl-brand-VISA");
@@ -487,7 +487,7 @@ function init_woocommerce_zing()
 					echo '</div>';
 					echo '<div style="text-align: center; margin-top:10px;">';
 					echo '<a href="https://Zing.gg" target="_blank">';
-					echo '<img src="' . plugins_url() . '/woocommerce-gateway-zing/assets/images/general/zing-gg-dark.svg" width="100px">';
+					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/zing-gg-dark.svg" width="100px">';
 					echo '</a>';
 					echo '</div>';
 				} else {

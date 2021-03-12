@@ -1,6 +1,7 @@
 <?php
 
 /**
+
  * Plugin Name: WooCommerce Zing Gateway
  * Plugin URI: https://zing.gg
  * Author: Zing.gg

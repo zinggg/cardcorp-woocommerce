@@ -6,7 +6,7 @@
  * Author: Zing.gg
  * Author URI:  * Plugin URI: https://zing.gg
  * Description: WooCommerce Plugin for accepting payments through Zing.gg.
- * Version: 1.4.2
+ * Version: 2.0
  * Tested up to: 5.4.2
  * WC requires at least: 3.0
  * WC tested up to: 4.2.2
@@ -26,6 +26,8 @@ function init_woocommerce_zing()
 	}
 	class woocommerce_zing extends WC_Payment_Gateway
 	{
+
+		protected $version = '2.0';
 
 		/**
 		 * Construct Main Functions
@@ -53,8 +55,8 @@ function init_woocommerce_zing()
 			$this->supports			= array('refunds');
 			$this->basket			= $this->settings['basket'] == 'yes';
 
-			if ($this->operation		== 'live') {
-				$this->zing_url	= "https://oppwa.com";
+			if ($this->operation == 'live') {
+				$this->zing_url			= "https://oppwa.com";
 				$this->ACCESS_TOKEN		= $this->settings['access_token'];
 				$this->ENTITY_ID		= $this->settings['entity_id'];
 			} else {
@@ -62,7 +64,7 @@ function init_woocommerce_zing()
 				$this->ACCESS_TOKEN		= $this->settings['test_access_token'];
 				$this->ENTITY_ID		= $this->settings['test_entity_id'];
 			}
-			$this->paymentType		= 'DB';
+			$this->paymentType			= 'DB';
 
 			if ($this->settings['card_supported'] !== NULL) {
 				$this->cards = implode(' ', $this->settings['card_supported']);
@@ -73,16 +75,14 @@ function init_woocommerce_zing()
 			$this->return_url   			= add_query_arg('wc-api', 'zing_payment', home_url('/'));
 
 
-			// if ($this->settings['dob'] == 'yes' && $this->settings['enabled'] == 'yes') {
-			// 	add_filter('woocommerce_billing_fields', 'add_birth_date_billing_field', 20, 1); 
-			// }
-
+			if ($this->settings['dob'] == 'yes' && $this->settings['enabled'] == 'yes') {
+				add_action('woocommerce_review_order_before_submit', 'check_client_age_field');
+			}
 
 			/* Actions */
 			add_action('init', array($this, 'zing_process'));
 			add_action('woocommerce_api_zing_payment', array($this, 'zing_process'));
 			add_action('woocommerce_receipt_zing', array($this, 'receipt_page'));
-			add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 			add_action('woocommerce_order_refunded', array($this, 'action_woocommerce_order_refunded'), 10, 2);
 			add_action('woocommerce_order_action_zing_capture', array($this, 'capture_payment'));
 			add_action('woocommerce_order_action_zing_reverse', array($this, 'reverse_payment'));
@@ -96,17 +96,31 @@ function init_woocommerce_zing()
 
 			/* Lets check for SSL */
 			add_action('admin_notices', array($this, 'do_ssl_check'));
-			wp_enqueue_style('zing_style', plugin_dir_url(__FILE__) . 'assets/css/zing-style.css', array(), null);
-		}
+			wp_enqueue_style('zing_style', plugin_dir_url(__FILE__) . 'assets/css/zing-style.css', array(), $this->version);
 
-		public function do_ssl_check()
-		{
-			if ($this->enabled == "yes") {
-				if (get_option('woocommerce_force_ssl_checkout') == "no") {
-					echo "<div class=\"error\"><p>" . sprintf(__("<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL certificate on your checkout page. Please ensure that you have a valid SSL certificate and that you are <a href=\"%s\">forcing the checkout pages to be secured.</a>"), $this->method_title, admin_url('admin.php?page=wc-settings&tab=advanced')) . "</p></div>";
-				}
+
+			$tab = isset($_GET['zing_tab']) ? $_GET['zing_tab'] : null;
+
+			if($tab !== null) {
+				$GLOBALS['hide_save_button'] = true;
+			} else {
+				add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 			}
 		}
+
+		public function do_ssl_check() {
+            if( $this->enabled == "yes" ) {
+                if( get_option( 'woocommerce_force_ssl_checkout' ) == "no" ) { ?> 
+                    <div class="error">
+                    	<p>
+                    		<?= sprintf( __( "<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL certificate on your checkout page. Please ensure that you have a valid SSL certificate and that you are <a href=\"%s\">forcing the checkout pages to be secured.</a>" ), $this->method_title, admin_url( 'admin.php?page=wc-settings&tab=advanced' ) ); ?>
+                    		
+                    	</p>
+                    </div>
+                <?php } ?>
+            <?php }
+        }
+
 
 		/**
 		 * Woocommerce Admin Panel Option Manage Zing.gg Settings here.
@@ -115,12 +129,49 @@ function init_woocommerce_zing()
 		 */
 		public function admin_options()
 		{
-			echo '<h2>' . 'Zing.gg Payment Gateway' . ' </h2>';
-			echo '<p>' . 'Zing.gg Configuration Settings' . '</p>';
-			echo '<table class="form-table">';
-			$this->generate_settings_html();
-			echo '</table>';
-			wc_enqueue_js("jQuery( function( $ ) {
+
+			$default_tab = null;
+ 		 	$tab = isset($_GET['zing_tab']) ? $_GET['zing_tab'] : $default_tab; ?>
+
+				<nav class="nav-tab-wrapper">
+
+      				<a href="?page=wc-settings&tab=checkout&section=zing" 
+      					class="nav-tab <?php if($tab===null) { ?> nav-tab-active <?php } ?>">General Settings</a>
+
+      				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=requires" 
+      					class="nav-tab <?php if($tab==="requires") { ?> nav-tab-active <?php } ?>">Requires</a>
+
+      				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=logs" 
+      				class="nav-tab <?php if($tab==="logs") { ?> nav-tab-active <?php } ?>">Logs</a>
+
+    			</nav>
+
+				<div class="tab-content">
+					<?php
+				    	switch($tab) :
+					    	case 'requires':
+					        	$this->requiresTab();
+					        	break;
+					      	case 'logs':
+					        	$this->logsTab();
+					        	break;
+					      	default:
+					        	$this->generalSettingsTab();
+					        	break;
+					    endswitch;
+				    ?>
+				</div>
+			<?php
+		}
+
+		public function generalSettingsTab() {
+			?>
+			<h2>Zing.gg Payment Gateway</h2>
+				<p>Zing.gg Configuration Settings</p>
+				<table class="form-table">
+					<?php $this->generate_settings_html(); ?>
+				</table>
+			<?php wc_enqueue_js("jQuery( function( $ ) {
 				var zing_test_fields = '#woocommerce_zing_test_entity_id, #woocommerce_zing_test_access_token'; 
 				var zing_live_fields = '#woocommerce_zing_entity_id, #woocommerce_zing_access_token'; 
 				$( '#woocommerce_zing_operation_mode' ).change(function(){ 
@@ -138,6 +189,78 @@ function init_woocommerce_zing()
 			});");
 		}
 
+		public function requiresTab() {
+			global $wp_version;
+			?>
+
+				<h3>Requires</h3>
+				<table  class="requires-table">
+					<tbody>
+						<tr>
+							<td>PHP</td>
+							<td><strong><?= phpversion(); ?></strong></td>
+							<td>
+								<?php if(phpversion() >= '7.0.0') { ?>
+									<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<?php } else if(phpversion() >= '5.2.0') { ?>
+									<span class="dashicons dashicons-info zingg-warning-text"></span>
+								<?php } else { ?>
+									<span class="dashicons dashicons-no zingg-error-text"></span>
+								<?php } ?>
+							</td>
+						</tr>
+						<tr>
+							<td>WordPress</td>
+							<td><?= $wp_version; ?></td>
+							<td>
+								<?php if($wp_version >= '5.4.0') { ?>
+									<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<?php } else if($wp_version >= '5.0.0') { ?>
+									<span class="dashicons dashicons-info zingg-warning-text"></span>
+								<?php } else { ?>
+									<span class="dashicons dashicons-no zingg-error-text"></span>
+								<?php } ?>
+							</td>
+						</tr>
+						<tr>
+							<td>WooCommerce</td>
+							<td><?= WC_VERSION; ?></td>
+							<td>
+								<?php if(WC_VERSION >= '4.2.2') { ?>
+									<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<?php } else if(WC_VERSION >= '3.0') { ?>
+									<span class="dashicons dashicons-info zingg-warning-text"></span>
+								<?php } else { ?>
+									<span class="dashicons dashicons-no zingg-error-text"></span>
+								<?php } ?>
+							</td>
+						</tr>
+						<tr>
+							<td>Force SSL</td>
+							<td><?php if(get_option( 'woocommerce_force_ssl_checkout' ) == "no") { ?> No <?php } else { ?> Yes <?php } ?></td>
+							<td>
+								<?php if(get_option( 'woocommerce_force_ssl_checkout' ) == "no") { ?>
+									<span class="dashicons dashicons-no zingg-error-text"></span>
+								<?php } else { ?>
+									<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<?php } ?>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+			<?php
+		}
+
+		public function logsTab() {
+			?>
+				<h3>Logs</h3>
+
+				<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_zing_logs(); ?></textarea>
+
+			<?php
+		}
+
 		/**
 		 * Initialise Zing.gg Woo Plugin Settings Form Fields
 		 *
@@ -147,101 +270,101 @@ function init_woocommerce_zing()
 		{
 
 			$this->form_fields = array(
-				'enabled' => array(
-					'title'	=>  'Enable/Disable',
-					'type' 	=> 'checkbox',
-					'label' =>  'Enable Zing.gg',
-					'default' => 'yes'
+				'enabled' 			=> array(
+					'title'				=> 'Enable/Disable',
+					'type' 				=> 'checkbox',
+					'label' 			=> 'Enable Zing.gg',
+					'default' 			=> 'yes'
 				),
-				'operation_mode' => array(
-					'title' 		=>  'Operation Mode',
-					'default' 		=> 'Payments processed by Zing.gg',
-					'description' 	=> 'You can switch between different environments, by selecting the corresponding operation mode',
-					'type' 			=> 'select',
-					'class'			=> 'zing_mode',
-					'options' 		=> array(
-						'test' =>  'Test Mode',
-						'live' =>  'Live Mode',
+				'operation_mode' 	=> array(
+					'title' 			=> 'Operation Mode',
+					'default' 			=> 'Payments processed by Zing.gg',
+					'description' 		=> 'You can switch between different environments, by selecting the corresponding operation mode',
+					'type' 				=> 'select',
+					'class'				=> 'zing_mode',
+					'options' 			=> 	array(
+						'test' 				=>  'Test Mode',
+						'live' 				=>  'Live Mode',
 					)
 				),
-				'description' => array(
-					'title' 		=> 'Description',
-					'type' 			=> 'text',
-					'description' 	=> 'This controls the description which the user sees during checkout',
-					'default' 		=> 'Payments processed by Zing.gg',
-					'desc_tip'    	=> true
+				'description' 		=> array(
+					'title' 			=> 'Description',
+					'type' 				=> 'text',
+					'description' 		=> 'This controls the description which the user sees during checkout',
+					'default' 			=> 'Payments proccessed by Zing.gg',
+					'desc_tip'    		=> true
 				),
-				'test_credentials' => array(
-					'title'       => 'API Test Credentials',
-					'type'        => 'title',
-					'description' => 'Enter your Zing.gg Test API Credentials to process transactions via Zing.gg. 
+				'test_credentials' 	=> array(
+					'title'       		=> 'API Test Credentials',
+					'type'        		=> 'title',
+					'description' 		=> 'Enter your Zing.gg Test API Credentials to process transactions via Zing.gg. 
 										You can get your Zing.gg Test Credentials via 
 										<a href="mailto:support@zing.gg">Zing.gg Support</a>',
 				),
-				'test_entity_id' => array(
-					'title' 		=>  'Test Entity ID',
-					'type' 			=> 'text',
-					'description' 	=>  'Please enter your Zing.gg Test Entity ID. This is needed in order to take the payment',
-					'default'		=> '',
-					'desc_tip'    	=> true
+				'test_entity_id' 	=> array(
+					'title' 			=> 'Test Entity ID',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter your Zing.gg Test Entity ID. This is needed in order to take the payment',
+					'default'			=> '',
+					'desc_tip'    		=> true
 				),
 				'test_access_token' => array(
-					'title' 		=> 'Test Access Token',
-					'type' 			=> 'text',
-					'description' 	=> 'Please enter your Zing.gg Test Access Token. This is needed in order to take the payment',
-					'default' 		=> '',
-					'desc_tip'    	=> true
+					'title' 			=> 'Test Access Token',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter your Zing.gg Test Access Token. This is needed in order to take the payment',
+					'default' 			=> '',
+					'desc_tip'    		=> true
 				),
-				'live_credentials' => array(
-					'title'       => 'API LIVE Credentials',
-					'type'        => 'title',
-					'description' => 'Enter your Zing.gg Live API Credentials to process transactions via Zing.gg. You can get your Zing.gg Live Credentials via 
+				'live_credentials' 	=> array(
+					'title'       		=> 'API LIVE Credentials',
+					'type'        		=> 'title',
+					'description' 		=> 'Enter your Zing.gg Live API Credentials to process transactions via Zing.gg. You can get your Zing.gg Live Credentials via 
 										<a href="mailto:support@zing.gg">Zing.gg Support</a>',
 				),
-				'entity_id' => array(
-					'title' 		=> 'Entity ID',
-					'type' 			=> 'text',
-					'description' 	=> 'Please enter your Zing.gg Entity ID. This is needed in order to the take payment',
-					'default' 		=> '',
-					'desc_tip'    	=> true
+				'entity_id' 		=> array(
+					'title' 			=> 'Entity ID',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter your Zing.gg Entity ID. This is needed in order to the take payment',
+					'default' 			=> '',
+					'desc_tip'    		=> true
 				),
-				'access_token' => array(
-					'title' 		=> 'Access Token',
-					'type' 			=> 'text',
-					'description' 	=> 'Please enter your Zing.gg Access Token. This is needed in order to take the payment',
-					'default' 		=> '',
-					'desc_tip'    	=> true
+				'access_token' 		=> array(
+					'title' 			=> 'Access Token',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter your Zing.gg Access Token. This is needed in order to take the payment',
+					'default' 			=> '',
+					'desc_tip'    		=> true
 				),
-				'hr' => array(
-					'title' =>  '<hr>',
-					'type' 	=> 'title',
+				'hr' 				=> array(
+					'title' 			=> '<hr>',
+					'type' 				=> 'title',
 				),
-				'dob' => array(
-					'title'	=>  'Enable/Disable',
-					'type' 	=> 'checkbox',
-					'label' =>  'Enable Over 18s Date of Birth Field',
-					'default' => 'no'
+				'dob' 				=> array(
+					'title'				=> 'Enable/Disable',
+					'type' 				=> 'checkbox',
+					'label' 			=> 'Enable Over 18s Date of Birth Field',
+					'default' 			=> 'no'
 				),
-				'basket' => array(
-					'title'	=>  'Enable/Disable',
-					'type' 	=> 'checkbox',
-					'label' =>  'Enable Cart/Basket above checkout form.',
-					'default' => 'no'
+				'basket' 			=> array(
+					'title'				=> 'Enable/Disable',
+					'type' 				=> 'checkbox',
+					'label' 			=> 'Enable Cart/Basket above checkout form.',
+					'default' 			=> 'no'
 				),
 
-				'card_supported' => array(
-					'title' => 'Accepted Cards',
-					'default' => array(
+				'card_supported' 	=> array(
+					'title' 			=> 'Accepted Cards',
+					'default' 			=>  array(
 						'VISA',
 						'MASTER',
 						'MAESTRO'
 					),
-					'css'   => 'height: 100%;',
-					'type' => 'multiselect',
-					'options' => array(
-						'VISA' => 'VISA',
-						'MASTER' => 'MASTER',
-						'MAESTRO' => 'MAESTRO',
+					'css'   			=> 'height: 100%;',
+					'type' 				=> 'multiselect',
+					'options' 		=> array(
+						'VISA' 			=> 'VISA',
+						'MASTER' 		=> 'MASTER',
+						'MAESTRO' 		=> 'MAESTRO',
 					)
 				)
 			);
@@ -264,7 +387,7 @@ function init_woocommerce_zing()
 
 			if (isset($this->cards_supported) && '' !== $this->cards_supported) {
 				foreach ($this->cards_supported as $card) {
-					$icons = plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/' . strtolower($card) . '.svg';
+					$icons = plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/' . strtolower($card) . '.svg';
 					$icon_html .= '<img src="' . $icons . '" alt="' . strtolower($card) . '" title="' . strtolower($card) . '" style="height:30px; margin:5px 0px 5px 10px; vertical-align: middle; float: none; display: inline; text-align: right;" />';
 				}
 			}
@@ -290,9 +413,6 @@ function init_woocommerce_zing()
 			$order = new WC_Order($order_id);
 
 			$tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
-			//echo '<br><br><br><br><br><br><br><br><br>';
-			//echo '<h1>'. get_current_user_id(). '</h1>';
-			//var_dump($tokens);exit;die;
 			$i = 0;
 			$cards = "";
 			$duplicates = array();
@@ -303,9 +423,6 @@ function init_woocommerce_zing()
 					$i++;
 				}
 			}
-
-
-
 
 
 			/* Required Order Details */
@@ -325,8 +442,8 @@ function init_woocommerce_zing()
 				. "&customer.phone=" . $order->get_billing_phone()
 				. "&customer.givenName=" . $order->get_billing_first_name()
 				. "&customer.surname=" . $order->get_billing_last_name()
-				. "&customer.merchantCustomerId=" . $customer
-				. "&paymentType=" . $this->paymentType
+				. "&customer.merchantCustomerId=" . $customer;
+				$data .= "&paymentType=" . $this->paymentType
 				. "&shipping.city=" . $order->get_shipping_city()
 				. "&shipping.country=" . $order->get_shipping_country()
 				. "&shipping.street1=" . $order->get_shipping_address_1()
@@ -344,11 +461,6 @@ function init_woocommerce_zing()
 					'timeout' => 200,
 				)
 			);
-
-			//echo '<br><br><br><br><br><br><br><br>';
-
-			//var_dump($gtwresponse);
-			//exit;die;
 			if (!is_wp_error($gtwresponse)) {
 				$status = json_decode($gtwresponse['body']);
 				if (isset($status->id)) { ?>
@@ -408,7 +520,7 @@ function init_woocommerce_zing()
 
 
 
-<?php
+					<?php
 					// ICON
 					// <div id=\"d3\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/zing-gg-dark.svg\" alt=\"Secure Payment\"></div>
 					$lang = strtolower(substr(get_bloginfo('language'), 0, 2));
@@ -434,7 +546,7 @@ function init_woocommerce_zing()
 
 							$("button[data-action=show-initial-forms]").html("Use Another Card"); 
 							
-					        var BannerHtml = "<div id=\"banner\"><div id=\"d1\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div></div>";
+					        var BannerHtml = "<div id=\"banner\"><div id=\"d1\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div></div>";
 						    $("form.wpwl-form-card").find(".wpwl-group-submit").after(BannerHtml);
 						    $(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
 							var visa = $(".wpwl-brand:first").clone().removeAttr("class").attr("class", "wpwl-brand-card wpwl-brand-custom wpwl-brand-VISA");
@@ -485,9 +597,9 @@ function init_woocommerce_zing()
 					echo '<div id="zing_payment_container">';
 					echo '<form action="' . $this->return_url . '" class="paymentWidgets">' . $this->cards . '</form>';
 					echo '</div>';
-					echo '<div style="text-align: center; margin-top:10px;">';
+					echo '<div style="text-align: center; margin-top: 10px; max-width: 200px; margin-left: auto; margin-right: auto;">';
 					echo '<a href="https://Zing.gg" target="_blank">';
-					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/zing-gg-dark.svg" width="100px">';
+					echo '<img src="' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/zing-gg-dark.svg" width="100px">';
 					echo '</a>';
 					echo '</div>';
 				} else {
@@ -497,8 +609,10 @@ function init_woocommerce_zing()
 					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
 						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
 						$order->add_order_note(sprintf('Zing.gg Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
+						zing_write_log(sprintf('Zing.gg Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
 					} else {
 						$order->add_order_note(sprintf('Zing.gg Configuration error: %s', $gtwresponse['body']));
+						zing_write_log(sprintf('Zing.gg Configuration error: %s', $gtwresponse['body']));
 					}
 					wc_add_notice('Configuration error', 'error');
 					wp_safe_redirect(wc_get_page_permalink('cart'));
@@ -559,6 +673,9 @@ function init_woocommerce_zing()
 
 						$order->add_order_note(sprintf('Zing.gg Transaction Successful. The Transaction ID was %s and Payment Status %s. 
 						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
+						zing_write_log(sprintf('Zing.gg Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
+
 						$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
 						$bank_code = $status->resultDetails;
 						$astrxId = $status->id;
@@ -593,7 +710,9 @@ function init_woocommerce_zing()
 						include_once(dirname(__FILE__) . '/includes/error_list.php');
 						$resp_code = $status->result->code;
 						$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $status->result->description;
+						zing_write_log($resp_code_translated);
 						$order->add_order_note(sprintf('Zing.gg Transaction Failed. The Transaction Status %s', $status->result->description));
+						zing_write_log(sprintf('Zing.gg Transaction Failed. The Transaction Status %s', $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
 						$astrxId = $status->id;
@@ -648,10 +767,12 @@ function init_woocommerce_zing()
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('Zing.gg Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
+				zing_write_log(sprintf('Zing.gg Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
 				$order->update_status('wc-accepted');
 				return true;
 			} else {
 				$order->add_order_note(sprintf('Zing.gg Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
+				zing_write_log(sprintf('Zing.gg Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -706,10 +827,12 @@ function init_woocommerce_zing()
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('Zing.gg Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
+				zing_write_log(sprintf('Zing.gg Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
 				$order->update_status('wc-reversed');
 				return true;
 			} else {
 				$order->add_order_note(sprintf('Zing.gg Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
+				zing_write_log(sprintf('Zing.gg Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -777,10 +900,12 @@ function init_woocommerce_zing()
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('Zing.gg Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
+				zing_write_log(sprintf('Zing.gg Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
 				$order->update_status('wc-refunded');
 				return true;
 			} else {
 				$order->add_order_note(sprintf('Zing.gg Refund Request Failed. The Refund Status: %s', $response->result->description));
+				zing_write_log(sprintf('Zing.gg Refund Request Failed. The Refund Status: %s', $response->result->description));
 				return false;
 			}
 			return false;
@@ -832,11 +957,14 @@ function init_woocommerce_zing()
 				include_once(dirname(__FILE__) . '/includes/error_list.php');
 				$resp_code = $gwresponse->result->code;
 				$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $gwresponse->result->description;
-				echo "<div class='woocommerce'><ul class='woocommerce-error' role='alert'>
-				<li>" . sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated) . " * </li>
-				</ul>
-				</div>";
-			}
+				zing_write_log($resp_code_translated); ?>
+
+				<div class="woocommerce">
+					<ul class="woocommerce-error" role="alert">
+						<li><?= sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated); ?> * </li>
+					</ul>
+				</div>
+			<?php }
 		}
 
 		/**
@@ -850,32 +978,37 @@ function init_woocommerce_zing()
 			if (isset($_REQUEST['astrxId'])) {
 				$astrxId = $_REQUEST['astrxId'];
 				$gwresponse = json_decode($this->report_payment($order_id));
-				echo "<div class='woocommerce-order'>
-				<h2>" . 'Transaction details' . ": </h2>
-				<ul class='woocommerce-order-overview woocommerce-thankyou-order-details order_details tst'>
-					<li class='woocommerce-order-overview__email email'>" . 'Transaction Codes';
-				if (isset($gwresponse->resultDetails->ConnectorTxID1)) {
-					echo ('<strong>' . $gwresponse->resultDetails->ConnectorTxID1 . '</strong>');
-				}
-				if (isset($gwresponse->resultDetails->ConnectorTxID2)) {
-					echo ('<strong>' . $gwresponse->resultDetails->ConnectorTxID2 . '</strong>');
-				}
-				if (isset($gwresponse->resultDetails->ConnectorTxID3)) {
-					echo ('<strong>' . $gwresponse->resultDetails->ConnectorTxID3 . '</strong>');
-				}
-				echo "</li>
-						<li class='woocommerce-order-overview__email email'>" . 'Card Type' .
-					"<strong>" . $gwresponse->paymentBrand . " *** " . $gwresponse->card->last4Digits . "</strong>
+			?>
+				<div class="woocommerce-order">
+					<h2>Transaction details</h2>
+					<ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details tst">
+						<li class="woocommerce-order-overview__email email">Transaction Codes 
+
+							<?php if (isset($gwresponse->resultDetails->ConnectorTxID1)) { ?>
+								<strong><?= $gwresponse->resultDetails->ConnectorTxID1; ?></strong>
+							<?php } ?>
+
+							<?php if (isset($gwresponse->resultDetails->ConnectorTxID2)) { ?>
+								<strong><?= $gwresponse->resultDetails->ConnectorTxID2; ?></strong>
+							<?php } ?>
+
+							<?php if (isset($gwresponse->resultDetails->ConnectorTxID3)) { ?>
+								<strong><?= $gwresponse->resultDetails->ConnectorTxID3; ?></strong>
+							<?php } ?>
+
 						</li>
-						<li class='woocommerce-order-overview__email email'>" . 'Payment Type' .
-					"<strong>" . $gwresponse->paymentType . "</strong>
+						<li class="woocommerce-order-overview__email email">Card Type 
+							<strong><?= $gwresponse->paymentBrand; ?> *** <?= $gwresponse->card->last4Digits; ?></strong>
 						</li>
-						<li class='woocommerce-order-overview__email email'>" . 'Transaction Time' .
-					"<strong>" . $gwresponse->timestamp . "</strong>
+						<li class="woocommerce-order-overview__email email">Payment Type 
+							<strong><?= $gwresponse->paymentType; ?></strong>
+						</li>
+						<li class="woocommerce-order-overview__email email">Transaction Time
+							<strong><?= $gwresponse->timestamp; ?></strong>
 						</li>
 					</ul>
-				</div>";
-			}
+				</div>
+			<?php } 
 		}
 
 

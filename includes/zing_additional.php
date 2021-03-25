@@ -163,41 +163,43 @@ function add_custom_order_status_icon()
 }
 
 // Adding a custom checkout date field
-//add_filter( 'woocommerce_billing_fields', 'add_birth_date_billing_field', 20, 1 );
+// REMOVE VALDIATION FOR
+add_action('woocommerce_checkout_process', 'check_if_have_18_years');
+function check_if_have_18_years()
+{
 
-// REMOVED EXTRA FORM FIELD FOR BIRTH DATE
-// function add_birth_date_billing_field($billing_fields)
-// {
+	$plugin = new woocommerce_zing();
 
-// 	$billing_fields['billing_birth_date'] = array(
-// 		'type'        => 'date',
-// 		'label'       => __('Birth date'),
-// 		'class'       => array('form-row-wide'),
-// 		'priority'    => 25,
-// 		'required'    => true,
-// 		'clear'       => true,
-// 	);
-// 	return $billing_fields;
-// }
+	if ($plugin->settings['dob'] == 'yes' && $plugin->settings['enabled'] == 'yes') {
 
-// // Check customer age
-// // REMOVE VALDIATION FOR
-// add_action('woocommerce_checkout_process', 'check_birth_date');
-// function check_birth_date()
-// {
-// 	if (isset($_POST['billing_birth_date']) && empty($_POST['billing_birth_date'])) {
-// 		wc_add_notice(__("You need at least to be 18 years old, to be able to checkout."), "error");
-// 	} 
-	
-// 	if (isset($_POST['billing_birth_date']) && !empty($_POST['billing_birth_date'])) {
-// 		// Get customer age from birthdate
-// 		$age = date_diff(date_create($_POST['billing_birth_date']), date_create('now'))->y;
-// 		// Checking age and display an error notice avoiding checkout (and emptying cart)
-// 		if ($age < 18) {
-// 			wc_add_notice(__("You need at least to be 18 years old, to be able to checkout."), "error");
-// 		}
-// 	}
-// }
+		if (!isset($_POST['have_18_years']) || empty($_POST['have_18_years'])) {
+			wc_add_notice(__("You need at least to be 18 years old, to be able to checkout."), "error");
+		}
+	}
+}
+
+
+//-----
+
+
+function check_client_age_field() {
+    echo '<div id="check_client_age_field">';
+
+    woocommerce_form_field( 'have_18_years', array(
+        'type'      => 'checkbox',
+        'class'     => array('input-checkbox'),
+        'label'     => __('I confirm that I am over 18 years old'),
+        'required'	=> true
+    ),  WC()->checkout->get_value( 'have_18_years' ) );
+    echo '</div>';
+}
+
+add_action('woocommerce_checkout_update_order_meta', ' check_client_age_field_update_order_meta', 10, 1);
+function  check_client_age_field_update_order_meta( $order_id ) {
+    if ( ! empty( $_POST['have_18_years'] ) )
+        update_post_meta( $order_id, 'have_18_years', $_POST['have_18_years'] );
+}
+//-----
 
 
 //Validation
@@ -228,4 +230,18 @@ function added_zing_validation()
 			wc_add_notice('Postcode is too long. Please shorten it.', "error");
 		}
 	}
+}
+
+
+function zing_write_log($message) { 
+    if(is_array($message)) { 
+        $message = json_encode($message); 
+    } 
+    $file = fopen(plugin_dir_path( __FILE__ ) . "/../custom_logs.log", "a"); 
+   	fwrite($file, "\n" . date('Y-m-d h:i:s') . " :: " . $message); 
+    fclose($file); 
+}
+
+function get_zing_logs() {
+	return file_get_contents(plugin_dir_path( __FILE__ ) . "/../custom_logs.log");
 }

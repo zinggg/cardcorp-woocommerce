@@ -1,0 +1,106 @@
+# Copyright (C) 2021 Zing.gg Payment
+# This file is distributed under the same license as the Zing.gg Payment package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Zing.gg Payment\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;"
+"_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;"
+"esc_html_e;esc_html_x:1,2c\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.4.2\n"
+"Last-Translator: \n"
+"Language: en_US\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+
+#: ../zing.gg/woocommerce-gateway-zing/woocommerce-gateway-zing.php:116
+msgid ""
+"<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL "
+"certificate on your checkout page. Please ensure that you have a valid SSL "
+"certificate and that you are <a href=\"%s\">forcing the checkout pages to be "
+"secured.</a>"
+msgstr ""
+"<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL "
+"certificate on your checkout page. Please ensure that you have a valid SSL "
+"certificate and that you are <a href=\"%s\">forcing the checkout pages to be "
+"secured.</a>"
+
+#: ../zing.gg/woocommerce-gateway-zing/woocommerce-gateway-zing.php:473
+msgid "Order number:"
+msgstr "Order number:"
+
+#: ../zing.gg/woocommerce-gateway-zing/woocommerce-gateway-zing.php:477
+msgid "Date:"
+msgstr "Date:"
+
+#: ../zing.gg/woocommerce-gateway-zing/woocommerce-gateway-zing.php:481
+msgid "Total:"
+msgstr "Total:"
+
+#: ../zing.gg/woocommerce-gateway-zing/woocommerce-gateway-zing.php:486
+msgid "Payment method:"
+msgstr "Payment method:"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:35
+msgctxt "WooCommerce Order Status"
+msgid "preauth"
+msgstr "preauth"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:40
+msgid "Preauth <span class=\"count\">(%s)</span>"
+msgid_plural "Preauth <span class=\"count\">(%s)</span>"
+msgstr[0] "Preauth <span class=\"count\">(%s)</span>"
+msgstr[1] "Preauth <span class=\"count\">(%s)</span>"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:47
+msgctxt "WooCommerce Order Status"
+msgid "Accepted"
+msgstr "Accepted"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:52
+msgid "Accepted <span class=\"count\">(%s)</span>"
+msgid_plural "Accepted <span class=\"count\">(%s)</span>"
+msgstr[0] "Accepted <span class=\"count\">(%s)</span>"
+msgstr[1] "Accepted <span class=\"count\">(%s)</span>"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:59
+msgctxt "WooCommerce Order Status"
+msgid "Reversed"
+msgstr "Reversed"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:64
+msgid "Reversed <span class=\"count\">(%s)</span>"
+msgid_plural "Reversed <span class=\"count\">(%s)</span>"
+msgstr[0] "Reversed <span class=\"count\">(%s)</span>"
+msgstr[1] "Reversed <span class=\"count\">(%s)</span>"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:73
+msgctxt "Preauth Order Status"
+msgid "Preauth"
+msgstr "Preauth"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:74
+msgctxt "Accepted Order Status"
+msgid "Accepted"
+msgstr "Accepted"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:75
+msgctxt "Reversed Order Status"
+msgid "Reversed"
+msgstr "Reversed"
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:176
+msgid "You need at least to be 18 years old, to be able to checkout."
+msgstr "You need at least to be 18 years old, to be able to checkout."
+
+#: ../zing.gg/woocommerce-gateway-zing/includes/zing_additional.php:191
+msgid "I confirm that I am over 18 years old"
+msgstr "I confirm that I am over 18 years old"

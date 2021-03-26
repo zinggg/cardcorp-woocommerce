@@ -172,8 +172,6 @@ div.form-head {
     }
 }
 
-
-
 .wpwl-wrapper-submit button {
     flex: 0 0 30%;
     margin-left: auto;
@@ -317,6 +315,34 @@ div#zing_banner {
     margin: auto;
     max-width: 80%;
 }
+
+textarea.logs_textarea {
+    background: rgb(35 40 45); 
+    color: #fff; 
+    text-shadow: 1px 0px #9bcbf7;
+}
+
+
+.zingg-success-text {
+    color: #46b450;
+}
+
+.zingg-error-text {
+    color: #dc3232;
+}
+
+.zingg-warning-text {
+    color: #ffc107;
+}
+
+table.requires-table {
+    min-width: 400px;
+}
+
+table.requires-table td {
+    font-weight: 600;
+}
+
 @media (max-width: 480px) {
     div#zing_banner {
         flex-flow: row wrap;

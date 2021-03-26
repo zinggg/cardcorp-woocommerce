@@ -102,7 +102,7 @@ function add_custom_order_status_icon()
 	if (!is_admin()) {
 		return;
 	}
-	?><style>
+?><style>
 		.column-order_status mark.preauth:after,
 		.column-order_status mark.accepted:after,
 		.column-order_status mark.reversed:after {
@@ -129,25 +129,25 @@ function add_custom_order_status_icon()
 			background-image: url(<?php echo esc_attr(plugins_url('../assets/images/general/reversed.png', __FILE__)); ?>);
 		}
 	</style><?php
-			}
+		}
 
-			/* This function hides Refund button */
-			add_action('admin_head', 'hide_wc_refund_button');
-			function hide_wc_refund_button()
-			{
-				global $post;
-				/* Here you can choose from which user roles to hide button from */
+		/* This function hides Refund button */
+		add_action('admin_head', 'hide_wc_refund_button');
+		function hide_wc_refund_button()
+		{
+			global $post;
+			/* Here you can choose from which user roles to hide button from */
+			return;
+			if (!current_user_can('administrator') || current_user_can('editor') || current_user_can('author') || current_user_can('contributor') || current_user_can('subscriber')) {
 				return;
-				if (!current_user_can('administrator') || current_user_can('editor') || current_user_can('author') || current_user_can('contributor') || current_user_can('subscriber')) {
-					return;
-				}
-				if (strpos($_SERVER['REQUEST_URI'], 'post.php?post=') === false) {
-					return;
-				}
-				if (empty($post) || $post->post_type != 'shop_order') {
-					return;
-				}
-				?>
+			}
+			if (strpos($_SERVER['REQUEST_URI'], 'post.php?post=') === false) {
+				return;
+			}
+			if (empty($post) || $post->post_type != 'shop_order') {
+				return;
+			}
+			?>
 	<script>
 		jQuery(function() {
 			jQuery('.refund-items').hide();
@@ -160,88 +160,92 @@ function add_custom_order_status_icon()
 		});
 	</script>
 <?php
-}
-
-// Adding a custom checkout date field
-// REMOVE VALDIATION FOR
-add_action('woocommerce_checkout_process', 'check_if_have_18_years');
-function check_if_have_18_years()
-{
-
-	$plugin = new woocommerce_zing();
-
-	if ($plugin->settings['dob'] == 'yes' && $plugin->settings['enabled'] == 'yes') {
-
-		if (!isset($_POST['have_18_years']) || empty($_POST['have_18_years'])) {
-			wc_add_notice(__("You need at least to be 18 years old, to be able to checkout."), "error");
 		}
-	}
-}
 
+		// Adding a custom checkout date field
+		// REMOVE VALDIATION FOR
+		add_action('woocommerce_checkout_process', 'check_if_have_18_years');
+		function check_if_have_18_years()
+		{
 
-//-----
+			$plugin = new woocommerce_zing();
 
+			if ($plugin->settings['dob'] == 'yes' && $plugin->settings['enabled'] == 'yes') {
 
-function check_client_age_field() {
-    echo '<div id="check_client_age_field">';
-
-    woocommerce_form_field( 'have_18_years', array(
-        'type'      => 'checkbox',
-        'class'     => array('input-checkbox'),
-        'label'     => __('I confirm that I am over 18 years old'),
-        'required'	=> true
-    ),  WC()->checkout->get_value( 'have_18_years' ) );
-    echo '</div>';
-}
-
-add_action('woocommerce_checkout_update_order_meta', ' check_client_age_field_update_order_meta', 10, 1);
-function  check_client_age_field_update_order_meta( $order_id ) {
-    if ( ! empty( $_POST['have_18_years'] ) )
-        update_post_meta( $order_id, 'have_18_years', $_POST['have_18_years'] );
-}
-//-----
-
-
-//Validation
-//add_action('woocommerce_checkout_process', 'added_zing_validation');
-function added_zing_validation()
-{ 
-	// Billing Address is too long
-	if (isset($_POST['billing_address_1']) && !empty($_POST['billing_address_1'])) {   
-		if (strlen($_POST['billing_address_1']) > 99) {
-			wc_add_notice('Street Address is too long. Please shorten it.', "error");
+				if (!isset($_POST['have_18_years']) || empty($_POST['have_18_years'])) {
+					wc_add_notice(__("You need at least to be 18 years old, to be able to checkout."), "error");
+				}
+			}
 		}
-	}	
-	// Billing country needs to be 2 charaters  (ISO 3166-1)
-	if (isset($_POST['billing_country']) && !empty($_POST['billing_country'])) {   
-		if (strlen($_POST['billing_country']) != 2) {
-			wc_add_notice('Billing Country Error', "error");
-		}
-	}
-	// Billing city is too long
-	if (isset($_POST['billing_city']) && !empty($_POST['billing_city'])) {   
-		if (strlen($_POST['billing_city']) > 79) {
-			wc_add_notice('Town / City is too long. Please shorten it.', "error");
-		}
-	}
-	// Billing city is too long
-	if (isset($_POST['billing_postcode']) && !empty($_POST['billing_postcode'])) {   
-		if (strlen($_POST['billing_postcode']) > 29) {
-			wc_add_notice('Postcode is too long. Please shorten it.', "error");
-		}
-	}
-}
 
 
-function zing_write_log($message) { 
-    if(is_array($message)) { 
-        $message = json_encode($message); 
-    } 
-    $file = fopen(plugin_dir_path( __FILE__ ) . "/../custom_logs.log", "a"); 
-   	fwrite($file, "\n" . date('Y-m-d h:i:s') . " :: " . $message); 
-    fclose($file); 
-}
+		//-----
 
-function get_zing_logs() {
-	return file_get_contents(plugin_dir_path( __FILE__ ) . "/../custom_logs.log");
-}
+
+		function check_client_age_field()
+		{
+			echo '<div id="check_client_age_field">';
+
+			woocommerce_form_field('have_18_years', array(
+				'type'      => 'checkbox',
+				'class'     => array('input-checkbox'),
+				'label'     => __('I confirm that I am over 18 years old'),
+				'required'	=> true
+			),  WC()->checkout->get_value('have_18_years'));
+			echo '</div>';
+		}
+
+		add_action('woocommerce_checkout_update_order_meta', ' check_client_age_field_update_order_meta', 10, 1);
+		function  check_client_age_field_update_order_meta($order_id)
+		{
+			if (!empty($_POST['have_18_years']))
+				update_post_meta($order_id, 'have_18_years', $_POST['have_18_years']);
+		}
+		//-----
+
+
+		//Validation
+		//add_action('woocommerce_checkout_process', 'added_zing_validation');
+		function added_zing_validation()
+		{
+			// Billing Address is too long
+			if (isset($_POST['billing_address_1']) && !empty($_POST['billing_address_1'])) {
+				if (strlen($_POST['billing_address_1']) > 99) {
+					wc_add_notice('Street Address is too long. Please shorten it.', "error");
+				}
+			}
+			// Billing country needs to be 2 charaters  (ISO 3166-1)
+			if (isset($_POST['billing_country']) && !empty($_POST['billing_country'])) {
+				if (strlen($_POST['billing_country']) != 2) {
+					wc_add_notice('Billing Country Error', "error");
+				}
+			}
+			// Billing city is too long
+			if (isset($_POST['billing_city']) && !empty($_POST['billing_city'])) {
+				if (strlen($_POST['billing_city']) > 79) {
+					wc_add_notice('Town / City is too long. Please shorten it.', "error");
+				}
+			}
+			// Billing city is too long
+			if (isset($_POST['billing_postcode']) && !empty($_POST['billing_postcode'])) {
+				if (strlen($_POST['billing_postcode']) > 29) {
+					wc_add_notice('Postcode is too long. Please shorten it.', "error");
+				}
+			}
+		}
+
+
+		function zing_write_log($message)
+		{
+			if (is_array($message)) {
+				$message = json_encode($message);
+			}
+			$file = fopen(plugin_dir_path(__FILE__) . "/../custom_logs.log", "a");
+			fwrite($file, "\n" . date('Y-m-d h:i:s') . " :: " . $message);
+			fclose($file);
+		}
+
+		function get_zing_logs()
+		{
+			return file_get_contents(plugin_dir_path(__FILE__) . "/../custom_logs.log");
+		}

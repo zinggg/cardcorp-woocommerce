@@ -386,6 +386,11 @@ function init_woocommerce_zing()
 			$icon_html = '';
 
 			if (isset($this->cards_supported) && '' !== $this->cards_supported) {
+				
+				if( !function_exists('get_plugin_data') ){
+					require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+				}
+
 				foreach ($this->cards_supported as $card) {
 					$icons = plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/' . strtolower($card) . '.svg';
 					$icon_html .= '<img src="' . $icons . '" alt="' . strtolower($card) . '" title="' . strtolower($card) . '" style="height:30px; margin:5px 0px 5px 10px; vertical-align: middle; float: none; display: inline; text-align: right;" />';
@@ -521,6 +526,11 @@ function init_woocommerce_zing()
 
 
 					<?php
+
+					if( !function_exists('get_plugin_data') ){
+						require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+					}
+
 					// ICON
 					// <div id=\"d3\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/zing-gg-dark.svg\" alt=\"Secure Payment\"></div>
 					$lang = strtolower(substr(get_bloginfo('language'), 0, 2));

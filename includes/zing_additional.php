@@ -194,7 +194,7 @@ function check_client_age_field() {
     echo '</div>';
 }
 
-add_action('woocommerce_checkout_update_order_meta', ' check_client_age_field_update_order_meta', 10, 1);
+add_action('woocommerce_checkout_update_order_meta', 'check_client_age_field_update_order_meta', 10, 1);
 function  check_client_age_field_update_order_meta( $order_id ) {
     if ( ! empty( $_POST['have_18_years'] ) )
         update_post_meta( $order_id, 'have_18_years', $_POST['have_18_years'] );

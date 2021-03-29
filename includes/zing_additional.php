@@ -195,14 +195,11 @@ function add_custom_order_status_icon()
 			echo '</div>';
 		}
 
-		add_action('woocommerce_checkout_update_order_meta', ' check_client_age_field_update_order_meta', 10, 1);
-		function  check_client_age_field_update_order_meta($order_id)
-		{
-			if (!empty($_POST['have_18_years']))
-				update_post_meta($order_id, 'have_18_years', $_POST['have_18_years']);
-		}
-		//-----
-
+    add_action('woocommerce_checkout_update_order_meta', 'check_client_age_field_update_order_meta', 10, 1);
+    function  check_client_age_field_update_order_meta( $order_id ) {
+        if ( ! empty( $_POST['have_18_years'] ) )
+            update_post_meta( $order_id, 'have_18_years', $_POST['have_18_years'] );
+    }
 
 		//Validation
 		//add_action('woocommerce_checkout_process', 'added_zing_validation');

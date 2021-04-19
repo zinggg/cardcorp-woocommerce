@@ -5,7 +5,7 @@ var wpwlOptions = {
     showPlaceholders: true,
     showLabels: false,
     autofocus: "card.number",
-	locale: object_name.lang_code, 
+    locale: object_name.lang_code,
 
     // when form ready
     onReady: function () {
@@ -58,11 +58,7 @@ var wpwlOptions = {
         // });
 
         // cancel button
-        var buttonCancel =
-            '<button type="button" class="wpwl-button wpwl-button-cancel lol" onclick="history.go(0)">' +
-            object_name.cancel +
-            "</button>";
-        $("form.wpwl-form").find(".wpwl-button").before(buttonCancel);
+
     },
 
     onChangeBrand: function (e) {
@@ -76,8 +72,8 @@ var wpwlOptions = {
             $(".wpwl-control-cardHolder").addClass("wpwl-has-error");
             $(".wpwl-wrapper-cardHolder").append(
                 '<div class="wpwl-hint wpwl-hint-cardHolderError">' +
-                    object_name.cardholder_error +
-                    "</div>"
+                object_name.cardholder_error +
+                "</div>"
             );
             return false;
         }

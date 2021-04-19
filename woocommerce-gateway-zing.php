@@ -101,25 +101,26 @@ function init_woocommerce_zing()
 
 			$tab = isset($_GET['zing_tab']) ? $_GET['zing_tab'] : null;
 
-			if($tab !== null) {
+			if ($tab !== null) {
 				$GLOBALS['hide_save_button'] = true;
 			} else {
 				add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
 			}
 		}
 
-		public function do_ssl_check() {
-            if( $this->enabled == "yes" ) {
-                if( get_option( 'woocommerce_force_ssl_checkout' ) == "no" ) { ?> 
-                    <div class="error">
-                    	<p>
-                    		<?= sprintf( __( "<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL certificate on your checkout page. Please ensure that you have a valid SSL certificate and that you are <a href=\"%s\">forcing the checkout pages to be secured.</a>" ), $this->method_title, admin_url( 'admin.php?page=wc-settings&tab=advanced' ) ); ?>
-                    		
-                    	</p>
-                    </div>
-                <?php } ?>
-            <?php }
-        }
+		public function do_ssl_check()
+		{
+			if ($this->enabled == "yes") {
+				if (get_option('woocommerce_force_ssl_checkout') == "no") { ?>
+					<div class="error">
+						<p>
+							<?= sprintf(__("<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL certificate on your checkout page. Please ensure that you have a valid SSL certificate and that you are <a href=\"%s\">forcing the checkout pages to be secured.</a>"), $this->method_title, admin_url('admin.php?page=wc-settings&tab=advanced')); ?>
+
+						</p>
+					</div>
+				<?php } ?>
+			<?php }
+		}
 
 
 		/**
@@ -131,47 +132,45 @@ function init_woocommerce_zing()
 		{
 
 			$default_tab = null;
- 		 	$tab = isset($_GET['zing_tab']) ? $_GET['zing_tab'] : $default_tab; ?>
+			$tab = isset($_GET['zing_tab']) ? $_GET['zing_tab'] : $default_tab; ?>
 
-				<nav class="nav-tab-wrapper">
+			<nav class="nav-tab-wrapper">
 
-      				<a href="?page=wc-settings&tab=checkout&section=zing" 
-      					class="nav-tab <?php if($tab===null) { ?> nav-tab-active <?php } ?>">General Settings</a>
+				<a href="?page=wc-settings&tab=checkout&section=zing" class="nav-tab <?php if ($tab === null) { ?> nav-tab-active <?php } ?>">General Settings</a>
 
-      				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=requires" 
-      					class="nav-tab <?php if($tab==="requires") { ?> nav-tab-active <?php } ?>">Requires</a>
+				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=requires" class="nav-tab <?php if ($tab === "requires") { ?> nav-tab-active <?php } ?>">Requires</a>
 
-      				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=logs" 
-      				class="nav-tab <?php if($tab==="logs") { ?> nav-tab-active <?php } ?>">Logs</a>
+				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=logs" class="nav-tab <?php if ($tab === "logs") { ?> nav-tab-active <?php } ?>">Logs</a>
 
-    			</nav>
+			</nav>
 
-				<div class="tab-content">
-					<?php
-				    	switch($tab) :
-					    	case 'requires':
-					        	$this->requiresTab();
-					        	break;
-					      	case 'logs':
-					        	$this->logsTab();
-					        	break;
-					      	default:
-					        	$this->generalSettingsTab();
-					        	break;
-					    endswitch;
-				    ?>
-				</div>
-			<?php
+			<div class="tab-content">
+				<?php
+				switch ($tab):
+					case 'requires':
+						$this->requiresTab();
+						break;
+					case 'logs':
+						$this->logsTab();
+						break;
+					default:
+						$this->generalSettingsTab();
+						break;
+				endswitch;
+				?>
+			</div>
+		<?php
 		}
 
-		public function generalSettingsTab() {
-			?>
+		public function generalSettingsTab()
+		{
+		?>
 			<h2>Zing.gg Payment Gateway</h2>
-				<p>Zing.gg Configuration Settings</p>
-				<table class="form-table">
-					<?php $this->generate_settings_html(); ?>
-				</table>
-			<?php wc_enqueue_js("jQuery( function( $ ) {
+			<p>Zing.gg Configuration Settings</p>
+			<table class="form-table">
+				<?php $this->generate_settings_html(); ?>
+			</table>
+		<?php wc_enqueue_js("jQuery( function( $ ) {
 				var zing_test_fields = '#woocommerce_zing_test_entity_id, #woocommerce_zing_test_access_token'; 
 				var zing_live_fields = '#woocommerce_zing_entity_id, #woocommerce_zing_access_token'; 
 				$( '#woocommerce_zing_operation_mode' ).change(function(){ 
@@ -189,74 +188,76 @@ function init_woocommerce_zing()
 			});");
 		}
 
-		public function requiresTab() {
+		public function requiresTab()
+		{
 			global $wp_version;
-			?>
+		?>
 
-				<h3>Requires</h3>
-				<table  class="requires-table">
-					<tbody>
-						<tr>
-							<td>PHP</td>
-							<td><strong><?= phpversion(); ?></strong></td>
-							<td>
-								<?php if(phpversion() >= '7.0.0') { ?>
-									<span class="dashicons dashicons-yes zingg-success-text"></span>
-								<?php } else if(phpversion() >= '5.2.0') { ?>
-									<span class="dashicons dashicons-info zingg-warning-text"></span>
-								<?php } else { ?>
-									<span class="dashicons dashicons-no zingg-error-text"></span>
-								<?php } ?>
-							</td>
-						</tr>
-						<tr>
-							<td>WordPress</td>
-							<td><?= $wp_version; ?></td>
-							<td>
-								<?php if($wp_version >= '5.4.0') { ?>
-									<span class="dashicons dashicons-yes zingg-success-text"></span>
-								<?php } else if($wp_version >= '5.0.0') { ?>
-									<span class="dashicons dashicons-info zingg-warning-text"></span>
-								<?php } else { ?>
-									<span class="dashicons dashicons-no zingg-error-text"></span>
-								<?php } ?>
-							</td>
-						</tr>
-						<tr>
-							<td>WooCommerce</td>
-							<td><?= WC_VERSION; ?></td>
-							<td>
-								<?php if(WC_VERSION >= '4.2.2') { ?>
-									<span class="dashicons dashicons-yes zingg-success-text"></span>
-								<?php } else if(WC_VERSION >= '3.0') { ?>
-									<span class="dashicons dashicons-info zingg-warning-text"></span>
-								<?php } else { ?>
-									<span class="dashicons dashicons-no zingg-error-text"></span>
-								<?php } ?>
-							</td>
-						</tr>
-						<tr>
-							<td>Force SSL</td>
-							<td><?php if(get_option( 'woocommerce_force_ssl_checkout' ) == "no") { ?> No <?php } else { ?> Yes <?php } ?></td>
-							<td>
-								<?php if(get_option( 'woocommerce_force_ssl_checkout' ) == "no") { ?>
-									<span class="dashicons dashicons-no zingg-error-text"></span>
-								<?php } else { ?>
-									<span class="dashicons dashicons-yes zingg-success-text"></span>
-								<?php } ?>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+			<h3>Requires</h3>
+			<table class="requires-table">
+				<tbody>
+					<tr>
+						<td>PHP</td>
+						<td><strong><?= phpversion(); ?></strong></td>
+						<td>
+							<?php if (phpversion() >= '7.0.0') { ?>
+								<span class="dashicons dashicons-yes zingg-success-text"></span>
+							<?php } else if (phpversion() >= '5.2.0') { ?>
+								<span class="dashicons dashicons-info zingg-warning-text"></span>
+							<?php } else { ?>
+								<span class="dashicons dashicons-no zingg-error-text"></span>
+							<?php } ?>
+						</td>
+					</tr>
+					<tr>
+						<td>WordPress</td>
+						<td><?= $wp_version; ?></td>
+						<td>
+							<?php if ($wp_version >= '5.4.0') { ?>
+								<span class="dashicons dashicons-yes zingg-success-text"></span>
+							<?php } else if ($wp_version >= '5.0.0') { ?>
+								<span class="dashicons dashicons-info zingg-warning-text"></span>
+							<?php } else { ?>
+								<span class="dashicons dashicons-no zingg-error-text"></span>
+							<?php } ?>
+						</td>
+					</tr>
+					<tr>
+						<td>WooCommerce</td>
+						<td><?= WC_VERSION; ?></td>
+						<td>
+							<?php if (WC_VERSION >= '4.2.2') { ?>
+								<span class="dashicons dashicons-yes zingg-success-text"></span>
+							<?php } else if (WC_VERSION >= '3.0') { ?>
+								<span class="dashicons dashicons-info zingg-warning-text"></span>
+							<?php } else { ?>
+								<span class="dashicons dashicons-no zingg-error-text"></span>
+							<?php } ?>
+						</td>
+					</tr>
+					<tr>
+						<td>Force SSL</td>
+						<td><?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?> No <?php } else { ?> Yes <?php } ?></td>
+						<td>
+							<?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?>
+								<span class="dashicons dashicons-no zingg-error-text"></span>
+							<?php } else { ?>
+								<span class="dashicons dashicons-yes zingg-success-text"></span>
+							<?php } ?>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 
-			<?php
+		<?php
 		}
 
-		public function logsTab() {
-			?>
-				<h3>Logs</h3>
+		public function logsTab()
+		{
+		?>
+			<h3>Logs</h3>
 
-				<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_zing_logs(); ?></textarea>
+			<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_zing_logs(); ?></textarea>
 
 			<?php
 		}
@@ -386,13 +387,13 @@ function init_woocommerce_zing()
 			$icon_html = '';
 
 			if (isset($this->cards_supported) && '' !== $this->cards_supported) {
-				
-				if( !function_exists('get_plugin_data') ){
-					require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+
+				if (!function_exists('get_plugin_data')) {
+					require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 				}
 
 				foreach ($this->cards_supported as $card) {
-					$icons = plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/' . strtolower($card) . '.svg';
+					$icons = plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/' . strtolower($card) . '.svg';
 					$icon_html .= '<img src="' . $icons . '" alt="' . strtolower($card) . '" title="' . strtolower($card) . '" style="height:30px; margin:5px 0px 5px 10px; vertical-align: middle; float: none; display: inline; text-align: right;" />';
 				}
 			}
@@ -448,7 +449,7 @@ function init_woocommerce_zing()
 				. "&customer.givenName=" . $order->get_billing_first_name()
 				. "&customer.surname=" . $order->get_billing_last_name()
 				. "&customer.merchantCustomerId=" . $customer;
-				$data .= "&paymentType=" . $this->paymentType
+			$data .= "&paymentType=" . $this->paymentType
 				. "&shipping.city=" . $order->get_shipping_city()
 				. "&shipping.country=" . $order->get_shipping_country()
 				. "&shipping.street1=" . $order->get_shipping_address_1()
@@ -525,10 +526,10 @@ function init_woocommerce_zing()
 
 
 
-					<?php
+				<?php
 
-					if( !function_exists('get_plugin_data') ){
-						require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+					if (!function_exists('get_plugin_data')) {
+						require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 					}
 
 					// ICON
@@ -556,7 +557,7 @@ function init_woocommerce_zing()
 
 							$("button[data-action=show-initial-forms]").html("Use Another Card"); 
 							
-					        var BannerHtml = "<div id=\"banner\"><div id=\"d1\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div></div>";
+					        var BannerHtml = "<div id=\"banner\"><div id=\"d1\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div></div>";
 						    $("form.wpwl-form-card").find(".wpwl-group-submit").after(BannerHtml);
 						    $(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
 							var visa = $(".wpwl-brand:first").clone().removeAttr("class").attr("class", "wpwl-brand-card wpwl-brand-custom wpwl-brand-VISA");
@@ -587,10 +588,7 @@ function init_woocommerce_zing()
 						echo '.after($(jcb))';
 					}
 					echo ';' . PHP_EOL;
-					echo 'var buttonCancel = "<a href=\"/checkout\" type=\"button\" class=\"wpwl-button wpwl-button-cancel\" onclick=\"history.go(0)\">' .
-						'Cancel' . '</button>"
-						$( "form.wpwl-form" ).find( ".wpwl-button" ).before( buttonCancel );
-						},
+					echo '},
 						onChangeBrand: function(e){
 							$(".wpwl-brand-custom").css("opacity", "0.2");
 							$(".wpwl-brand-" + e).css("opacity", "5"); 
@@ -609,7 +607,7 @@ function init_woocommerce_zing()
 					echo '</div>';
 					echo '<div style="text-align: center; margin-top: 10px; max-width: 200px; margin-left: auto; margin-right: auto;">';
 					echo '<a href="https://Zing.gg" target="_blank">';
-					echo '<img src="' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/zing-gg-dark.svg" width="100px">';
+					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/zing-gg-dark.svg" width="100px">';
 					echo '</a>';
 					echo '</div>';
 				} else {
@@ -992,7 +990,7 @@ function init_woocommerce_zing()
 				<div class="woocommerce-order">
 					<h2>Transaction details</h2>
 					<ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details tst">
-						<li class="woocommerce-order-overview__email email">Transaction Codes 
+						<li class="woocommerce-order-overview__email email">Transaction Codes
 
 							<?php if (isset($gwresponse->resultDetails->ConnectorTxID1)) { ?>
 								<strong><?= $gwresponse->resultDetails->ConnectorTxID1; ?></strong>
@@ -1007,10 +1005,10 @@ function init_woocommerce_zing()
 							<?php } ?>
 
 						</li>
-						<li class="woocommerce-order-overview__email email">Card Type 
+						<li class="woocommerce-order-overview__email email">Card Type
 							<strong><?= $gwresponse->paymentBrand; ?> *** <?= $gwresponse->card->last4Digits; ?></strong>
 						</li>
-						<li class="woocommerce-order-overview__email email">Payment Type 
+						<li class="woocommerce-order-overview__email email">Payment Type
 							<strong><?= $gwresponse->paymentType; ?></strong>
 						</li>
 						<li class="woocommerce-order-overview__email email">Transaction Time
@@ -1018,7 +1016,7 @@ function init_woocommerce_zing()
 						</li>
 					</ul>
 				</div>
-			<?php } 
+<?php }
 		}
 
 

@@ -40,10 +40,7 @@ if (strpos($this->cards, 'JCB') !== false) {
 	echo '.after($(jcb))';
 }
 echo ';' . PHP_EOL;
-echo 'var buttonCancel = "<button type=\"button\" class=\"wpwl-button wpwl-button-cancel\" onclick=\"history.go(0)\">' .
-	'Cancel' . '</button>"
-		$( "form.wpwl-form" ).find( ".wpwl-button" ).before( buttonCancel );
-		},
+echo '},
 		onChangeBrand: function(e){
 			$(".wpwl-brand-custom").css("opacity", "0.2");
 			$(".wpwl-brand-" + e).css("opacity", "5"); 

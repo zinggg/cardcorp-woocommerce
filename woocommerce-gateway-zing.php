@@ -423,9 +423,21 @@ function init_woocommerce_zing()
 			$cards = "";
 			$duplicates = array();
 			foreach ($tokens as $token) {
+
 				if (!in_array($token->get_token(), $duplicates)) {
-					$duplicates[] = $token->get_token();
-					$cards .= "&registrations[" . $i . "].id=" . $token->get_token();
+					$token_get_expiry_year = $token->get_expiry_year();
+					$token_get_expiry_month = $token->get_expiry_month();
+					$card_expiry_str = $token_get_expiry_year . '-' . $token_get_expiry_month;
+					$card_expiry_unix = strtotime($card_expiry_str);
+					$expiry_last_day_month_unix = strtotime(date("Y-m-t", $card_expiry_unix));
+
+					$date_now_unix = strtotime(date('now'));
+
+					if ($expiry_last_day_month_unix > $date_now_unix) {
+						$duplicates[] = $token->get_token();
+						$cards .= "&registrations[" . $i . "].id=" . $token->get_token();
+					}
+
 					$i++;
 				}
 			}

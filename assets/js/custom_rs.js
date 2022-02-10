@@ -7,26 +7,26 @@
     autofocus: "card.number",
     locale: object_name.lang_code,
     labels: {
-        cardHolder: "Korisnik kartice",
-        cvv: "Zaštitni kod",
+        cardHolder: "Card user",
+        cvv: "CVV",
         brand: " ",
-        expiryDate: "Datum isteka",
-        cardNumber: "Broj kartice",
-        cvvHint: "Tri broja na poleđini vaše kartice.",
-        cvvHintAmex: "Četiri broja na poleđini vaše kartice.",
+        expiryDate: "Expiry Date",
+        cardNumber: "Card Number",
+        cvvHint: "Three numbers on the back of your card.",
+        cvvHintAmex: "Four numbers on the back of your card.",
     },
     errorMessages: {
         cardHolderError: "__('CHECKOUT_TITLE_DESC', 'wc-asbecommerce')",
-        cardNumberError: "Pogrešan broj kartice",
-        cvvError: "Pogrešan CVV",
-        expiryMonthError: "Pogrešan datum",
-        expiryYearError: "Pogrešan datum",
+        cardNumberError: "Wrong card number",
+        cvvError: "Wrong CVV",
+        expiryMonthError: "Incorrect Expiry Month",
+        expiryYearError: "Incorrect Expiry Year",
     },
 
     // when form ready
     onReady: function () {
         ///  rename pay button
-        $(".wpwl-button-pay").html("Potvrdi");
+        $(".wpwl-button-pay").html("Confirm");
         ///  fadeout loader screen
         $(".load-container").delay(1000).fadeOut(1000);
         ///  move cvv before cardholder field

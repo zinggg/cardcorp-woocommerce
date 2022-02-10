@@ -6,7 +6,7 @@
  * Author: Zing.gg
  * Author URI:  * Plugin URI: https://zing.gg
  * Description: WooCommerce Plugin for accepting payments through Zing.gg.
- * Version: 1.5.0
+ * Version: 1.5.1
  * Tested up to: 5.4.2
  * WC requires at least: 3.0
  * WC tested up to: 4.2.2
@@ -56,11 +56,11 @@ function init_woocommerce_zing()
 			$this->basket			= $this->settings['basket'] == 'yes';
 
 			if ($this->operation == 'live') {
-				$this->zing_url			= "https://oppwa.com";
+				$this->zing_url			= "https://eu-prod.oppwa.com";
 				$this->ACCESS_TOKEN		= $this->settings['access_token'];
 				$this->ENTITY_ID		= $this->settings['entity_id'];
 			} else {
-				$this->zing_url	= "https://test.oppwa.com";
+				$this->zing_url	= "https://eu-test.oppwa.com";
 				$this->ACCESS_TOKEN		= $this->settings['test_access_token'];
 				$this->ENTITY_ID		= $this->settings['test_entity_id'];
 			}

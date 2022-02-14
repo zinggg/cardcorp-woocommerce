@@ -436,9 +436,8 @@ function init_woocommerce_zing()
 					if ($expiry_last_day_month_unix > $date_now_unix) {
 						$duplicates[] = $token->get_token();
 						$cards .= "&registrations[" . $i . "].id=" . $token->get_token();
+						$i++;
 					}
-
-					$i++;
 				}
 			}
 

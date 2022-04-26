@@ -49,8 +49,8 @@
             object_name.plugin_url +
             '/woocommerce-gateway-zing/assets/images/style001/secure-payment.png" alt="Secure Payment"></div></div>';
 
-        $("form.wpwl-form-card").find(".wpwl-group-submit").after(BannerHtml);
-
+        $("#zing_payment_container").append(BannerHtml);
+        
         /// card-brands list & change effect
         var visa = $(".wpwl-brand:first")
             .clone()

@@ -34,6 +34,17 @@ div.form-head {
     max-width: 600px;
     margin: 0 auto;
 }
+
+.wpwl-container-virtualAccount-APPLEPAY {
+    padding-top: 0px !important;
+    margin-top: 0px !important;
+}
+
+.wpwl-form-virtualAccount-APPLEPAY > .wpwl-group-button {
+    padding-top: 0px !important;
+    margin-top: 0px !important;
+}
+
 .wpwl-control {
     height: 44px !important;
     font-family: Roboto, sans-serif !important;

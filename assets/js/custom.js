@@ -15,7 +15,7 @@ var wpwlOptions = {
         // add bottom
         var BannerHtml = '<div id="banner"><div id="d1"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dmcsc.svg" alt="MasterCard SecureCode"></div><div id="d2"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dvbv.svg" alt="VerifiedByVISA"></div><div id="d3"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dasb.svg" alt="Secure Payment"></div></div>';
 
-        $("form.wpwl-form-card").find(".wpwl-group-submit").after(BannerHtml);
+        $("#zing_payment_container").append(BannerHtml);
 
         // card-brands list & change effect
 
@@ -66,17 +66,4 @@ var wpwlOptions = {
         $(".wpwl-brand-" + e).css("opacity", "5");
     },
 
-    /// check if cardholder is empty
-    onBeforeSubmitCard: function () {
-        if ($(".wpwl-control-cardHolder").val() == "") {
-            $(".wpwl-control-cardHolder").addClass("wpwl-has-error");
-            $(".wpwl-wrapper-cardHolder").append(
-                '<div class="wpwl-hint wpwl-hint-cardHolderError">' +
-                object_name.cardholder_error +
-                "</div>"
-            );
-            return false;
-        }
-        return true;
-    },
 };

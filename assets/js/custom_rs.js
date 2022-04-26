@@ -82,20 +82,6 @@
         this.$iframe.css({ borderColor: "", outline: "" });
     },
 
-    /// check if cardholder is empty
-    onBeforeSubmitCard: function () {
-        if ($(".wpwl-control-cardHolder").val() == "") {
-            $(".wpwl-control-cardHolder").addClass("wpwl-has-error");
-            $(".wpwl-wrapper-cardHolder").append(
-                '<div class="wpwl-hint wpwl-hint-cardHolderError">' +
-                    object_name.cardholder_error +
-                    "</div>"
-            );
-            return false;
-        }
-        return true;
-    },
-
     // after button clicked
     ///  rename pay button again
     onAfterSubmit: function () {

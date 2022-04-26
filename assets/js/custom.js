@@ -13,9 +13,9 @@ var wpwlOptions = {
         $(".wpwl-group-cvv").after($(".wpwl-group-cardHolder").detach());
 
         // add bottom
-        var BannerHtml = '<div id="banner"><div id="d1"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dmcsc.svg" alt="MasterCard SecureCode"></div><div id="d2"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dvbv.svg" alt="VerifiedByVISA"></div><div id="d3"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dasb.svg" alt="Secure Payment"></div></div>';
+        // var BannerHtml = '<div id="banner"><div id="d1"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dmcsc.svg" alt="MasterCard SecureCode"></div><div id="d2"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dvbv.svg" alt="VerifiedByVISA"></div><div id="d3"><img border="0" src="/wp-content/plugins/woocommerce-gateway-zing/assets/images/general/3dasb.svg" alt="Secure Payment"></div></div>';
 
-        $("#zing_payment_container").append(BannerHtml);
+        // $("#zing_payment_container").append(BannerHtml);
 
         // card-brands list & change effect
 

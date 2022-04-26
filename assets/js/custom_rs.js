@@ -39,18 +39,18 @@
             '/woocommerce-gateway-zing/assets/images/style001/allsecure.png" alt="AllSecure" ></div>';
         $("form.wpwl-form-card").find(".wpwl-wrapper-brand").before(LogoHtml);
 
-        /// add bottom
-        var BannerHtml =
-            '<div id="banner"><div id="r1"><img border="0" src="' +
-            object_name.plugin_url +
-            '/woocommerce-gateway-zing/assets/images/style001/msc.png" alt="MasterCard SecureCode"></div><div id="r2"><img border="0" src="' +
-            object_name.plugin_url +
-            '/woocommerce-gateway-zing/assets/images/style001/vbv.png" alt="VerifiedByVISA"></div><div id="r3"><img border="0" src="' +
-            object_name.plugin_url +
-            '/woocommerce-gateway-zing/assets/images/style001/secure-payment.png" alt="Secure Payment"></div></div>';
+        // /// add bottom
+        // var BannerHtml =
+        //     '<div id="banner"><div id="r1"><img border="0" src="' +
+        //     object_name.plugin_url +
+        //     '/woocommerce-gateway-zing/assets/images/style001/msc.png" alt="MasterCard SecureCode"></div><div id="r2"><img border="0" src="' +
+        //     object_name.plugin_url +
+        //     '/woocommerce-gateway-zing/assets/images/style001/vbv.png" alt="VerifiedByVISA"></div><div id="r3"><img border="0" src="' +
+        //     object_name.plugin_url +
+        //     '/woocommerce-gateway-zing/assets/images/style001/secure-payment.png" alt="Secure Payment"></div></div>';
 
-        $("#zing_payment_container").append(BannerHtml);
-        
+        // $("#zing_payment_container").append(BannerHtml);
+
         /// card-brands list & change effect
         var visa = $(".wpwl-brand:first")
             .clone()

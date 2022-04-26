@@ -40,7 +40,8 @@ div.form-head {
     margin-top: 0px !important;
 }
 
-.wpwl-form-virtualAccount-APPLEPAY > .wpwl-group-button {
+.wpwl-form-virtualAccount-APPLEPAY .wpwl-group-button {
+    text-align: right;
     padding-top: 0px !important;
     margin-top: 0px !important;
 }

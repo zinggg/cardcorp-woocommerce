@@ -358,7 +358,8 @@ function init_woocommerce_zing()
 					'default' 			=>  array(
 						'VISA',
 						'MASTER',
-						'MAESTRO'
+						'MAESTRO',
+						'APPLEPAY'
 					),
 					'css'   			=> 'height: 100%;',
 					'type' 				=> 'multiselect',
@@ -366,6 +367,7 @@ function init_woocommerce_zing()
 						'VISA' 			=> 'VISA',
 						'MASTER' 		=> 'MASTER',
 						'MAESTRO' 		=> 'MAESTRO',
+						'APPLEPAY' 		=> 'APPLEPAY',
 					)
 				)
 			);

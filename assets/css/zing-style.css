@@ -466,3 +466,22 @@ table.requires-table td {
         margin: 0;
     }
 }
+
+.wpwl-form.wpwl-form-virtualAccount-APPLEPAY {
+    padding: 0 15px !important;
+    margin: 0 auto !important;
+}
+.wpwl-group-submit {
+    padding-bottom: 0 !important;
+}
+
+.wpwl-button-pay, .wpwl-apple-pay-button {
+    flex:none !important;
+    width: 100%;
+    padding: .5rem 1rem !important;
+    margin: 0 auto !important;
+    height:48px;
+}
+.wpwl-button-pay {
+    margin-top: 1rem !important;
+}

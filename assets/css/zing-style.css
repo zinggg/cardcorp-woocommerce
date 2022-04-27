@@ -485,3 +485,21 @@ table.requires-table td {
 .wpwl-button-pay {
     margin-top: 1rem !important;
 }
+
+.wpwl-wrapper>.wpwl-icon {
+    right: 7px !important;
+    top: 7px !important;
+}
+
+.wpwl-form {
+    position: relative;
+}
+.wpwl-group-brand {
+    padding: 0 10px !important;
+    position: absolute !important;
+    width: auto;
+    right: 25px;
+    top: 12px;
+    z-index: 2;
+}
+.wpwl-brand-MAESTRO {display: none !important;}

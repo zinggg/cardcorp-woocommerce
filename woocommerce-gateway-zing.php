@@ -6,7 +6,7 @@
  * Author: Zing.gg
  * Author URI:  * Plugin URI: https://zing.gg
  * Description: WooCommerce Plugin for accepting payments through Zing.gg.
- * Version: 1.5.5
+ * Version: 1.5.6
  * Tested up to: 5.4.2
  * WC requires at least: 3.0
  * WC tested up to: 4.2.2
@@ -570,8 +570,6 @@ function init_woocommerce_zing()
 
 							$("button[data-action=show-initial-forms]").html("Use Another Card"); 
 							
-					        var BannerHtml = "<div id=\"banner\"><div id=\"d1\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div></div>";
-						    $("form.wpwl-form-card").find(".wpwl-group-submit").after(BannerHtml);
 						    $(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
 							var visa = $(".wpwl-brand:first").clone().removeAttr("class").attr("class", "wpwl-brand-card wpwl-brand-custom wpwl-brand-VISA");
 							var master = $(visa).clone().removeClass("wpwl-brand-VISA").addClass("wpwl-brand-MASTER");

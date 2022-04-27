@@ -10,10 +10,7 @@ echo 'showCVVHint: true,
 		showLabels: false,
 		onReady: function() { 
 		$(".wpwl-group-cvv").after( $(".wpwl-group-cardHolder").detach());';
-echo 'var BannerHtml = "<div id=\"banner\"><div id=\"d1\">
-		<img border=\"0\" src=\"' . plugins_url() . '/woocommerce-gateway-zing/assets/images/general/3dmcsc.svg\" alt=\"MasterCard SecureCode\"></div><div id=\"d2\"><img border=\"0\" src=\"' . plugins_url() . '/woocommerce-gateway-zing/assets/images/general/3dvbv.svg\" alt=\"VerifiedByVISA\"></div><div id=\"d3\"><img border=\"0\" src=\"' . plugins_url() . '/woocommerce-gateway-zing/assets/images/general/zing-gg-dark.svg\" alt=\"Secure Payment\"></div></div>";
-		$("form.wpwl-form-card").find(".wpwl-group-submit").after(BannerHtml);
-		$(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
+echo   '$(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
 		var visa = $(".wpwl-brand:first").clone().removeAttr("class").attr("class", "wpwl-brand-card wpwl-brand-custom wpwl-brand-VISA");
 		var master = $(visa).clone().removeClass("wpwl-brand-VISA").addClass("wpwl-brand-MASTER");
 		var maestro = $(visa).clone().removeClass("wpwl-brand-VISA").addClass("wpwl-brand-MAESTRO");

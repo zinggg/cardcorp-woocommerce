@@ -503,3 +503,6 @@ table.requires-table td {
     z-index: 2;
 }
 .wpwl-brand-MAESTRO {display: none !important;}
+
+
+.wpwl-control, .wpwl-control-cvv {border-radius: 1px !important;}

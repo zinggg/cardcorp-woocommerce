@@ -410,9 +410,10 @@ table.requires-table td {
         padding: 1px 1px 5px 1px !important;
     }
     .wpwl-button-pay {
-        width: 100%;
+        width: 150px;
         height: 50px;
         padding: 0.8em 1.8em !important;
+        margin: 0 auto;
     }
     .wpwl-brand-card {
         float: right;
@@ -431,6 +432,21 @@ table.requires-table td {
         display: none;
         padding: 0.8em 1.8em !important;
     }
+
+    .wpwl-form-virtualAccount-APPLEPAY {
+        margin-top: 0px !important;
+        padding-top: 0px !important;
+    }
+    .wpwl-form-virtualAccount-APPLEPAY > .wpwl-group-button, #wpwl-form-virtualAccount-APPLEPAY > form > div {
+        margin-top: 0px !important;
+        padding-top: 0px !important;
+        text-align: center !important;
+    }
+
+    .wpwl-apple-pay-button {
+        margin: 0 auto;
+        width: 150px;
+    }   
 }
 
 @media screen and (max-width: 480px) {

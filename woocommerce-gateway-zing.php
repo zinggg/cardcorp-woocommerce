@@ -433,7 +433,7 @@ function init_woocommerce_zing()
 					$card_expiry_unix = strtotime($card_expiry_str);
 					$expiry_last_day_month_unix = strtotime(date("Y-m-t", $card_expiry_unix));
 
-					$date_now_unix = strtotime(date('now'));
+					$date_now_unix = strtotime(date('Y-m-d'));
 
 					if ($expiry_last_day_month_unix > $date_now_unix) {
 						$duplicates[] = $token->get_token();

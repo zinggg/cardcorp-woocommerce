@@ -478,8 +478,8 @@ function init_woocommerce_zing()
 			};
 
 			if (($this->operation == 'test') && $this->settings['force3ds'] == 'yes'){
-				$data .= "&customParameters.3DS2_enrolled=true"; 
-				$data .= "&customParameters.3DS2_flow=challenge"; 
+				$data .= "&customParameters[3DS2_enrolled]=true"; 
+				$data .= "&customParameters[3DS2_flow]=challenge"; 
 			};
 
 			$data .= "&paymentType=" . $this->paymentType

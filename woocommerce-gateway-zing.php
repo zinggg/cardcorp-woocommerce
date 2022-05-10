@@ -473,6 +473,15 @@ function init_woocommerce_zing()
 				$data .= "&threeDSecure.challengeIndicator=04"; 
 			};
 
+			if ($this->operation == 'test'){
+				$data .= "&testMode=EXTERNAL"; 
+			};
+
+			if (($this->operation == 'test') && $this->settings['force3ds'] == 'yes'){
+				$data .= "&customParameters.3DS2_enrolled=true"; 
+				$data .= "&customParameters.3DS2_flow=challenge"; 
+			};
+
 			$data .= "&paymentType=" . $this->paymentType
 				. "&shipping.city=" . $order->get_shipping_city()
 				. "&shipping.country=" . $order->get_shipping_country()

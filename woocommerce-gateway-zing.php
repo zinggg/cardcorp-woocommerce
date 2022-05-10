@@ -281,7 +281,7 @@ function init_woocommerce_zing()
 					'title'				=> 'Enable/Disable',
 					'type' 				=> 'checkbox',
 					'label' 			=> 'Force 3DS Challenge',
-					'default' 			=> 'no'
+					'default' 			=> 'yes'
 				),
 				'operation_mode' 	=> array(
 					'title' 			=> 'Operation Mode',
@@ -469,7 +469,7 @@ function init_woocommerce_zing()
 				. "&customer.surname=" . $order->get_billing_last_name()
 				. "&customer.merchantCustomerId=" . $customer;
 
-			if($this->settings['force3ds'] != 'no'){
+			if($this->settings['force3ds'] == 'yes'){
 				$data .= "&threeDSecure.challengeIndicator=04"; 
 			};
 

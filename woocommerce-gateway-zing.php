@@ -277,6 +277,12 @@ function init_woocommerce_zing()
 					'label' 			=> 'Enable Zing.gg',
 					'default' 			=> 'yes'
 				),
+				'force3ds' 			=> array(
+					'title'				=> 'Enable/Disable',
+					'type' 				=> 'checkbox',
+					'label' 			=> 'Force 3DS Challenge',
+					'default' 			=> 'no'
+				),
 				'operation_mode' 	=> array(
 					'title' 			=> 'Operation Mode',
 					'default' 			=> 'Payments processed by Zing.gg',
@@ -462,12 +468,18 @@ function init_woocommerce_zing()
 				. "&customer.givenName=" . $order->get_billing_first_name()
 				. "&customer.surname=" . $order->get_billing_last_name()
 				. "&customer.merchantCustomerId=" . $customer;
+
+			if($this->settings['force3ds'] != 'no'){
+				$data .= "&threeDSecure.challengeIndicator=04"; 
+			};
+			
 			$data .= "&paymentType=" . $this->paymentType
 				. "&shipping.city=" . $order->get_shipping_city()
 				. "&shipping.country=" . $order->get_shipping_country()
 				. "&shipping.street1=" . $order->get_shipping_address_1()
 				. "&shipping.postcode=" . $order->get_shipping_postcode()
 				. $cards;
+
 
 
 			$head_data = "Bearer " . $this->ACCESS_TOKEN;
@@ -615,9 +627,6 @@ function init_woocommerce_zing()
 					echo '</a>';
 					echo '</div>';
 				} else {
-					echo '<br><br><br><br><br><br><br><br><br>';
-					echo '<h1>' . get_current_user_id() . '</h1>';
-					var_dump($data);
 					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
 						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
 						$order->add_order_note(sprintf('Zing.gg Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));

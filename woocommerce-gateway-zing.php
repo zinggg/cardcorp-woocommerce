@@ -6,7 +6,7 @@
  * Author: Zing.gg
  * Author URI:  * Plugin URI: https://zing.gg
  * Description: WooCommerce Plugin for accepting payments through Zing.gg.
- * Version: 1.5.7
+ * Version: 1.5.8
  * Tested up to: 5.4.2
  * WC requires at least: 3.0
  * WC tested up to: 4.2.2
@@ -472,7 +472,7 @@ function init_woocommerce_zing()
 			if($this->settings['force3ds'] != 'no'){
 				$data .= "&threeDSecure.challengeIndicator=04"; 
 			};
-			
+
 			$data .= "&paymentType=" . $this->paymentType
 				. "&shipping.city=" . $order->get_shipping_city()
 				. "&shipping.country=" . $order->get_shipping_country()

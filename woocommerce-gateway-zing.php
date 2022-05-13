@@ -6,7 +6,7 @@
  * Author: Zing.gg
  * Author URI:  * Plugin URI: https://zing.gg
  * Description: WooCommerce Plugin for accepting payments through Zing.gg.
- * Version: 1.5.8
+ * Version: 1.5.9
  * Tested up to: 5.4.2
  * WC requires at least: 3.0
  * WC tested up to: 4.2.2
@@ -635,7 +635,7 @@ function init_woocommerce_zing()
 					function validateHolder(e){
 						var holder = $(".wpwl-control-cardHolder").val();
 						if (holder.trim().length < 2){
-						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class="wpwl-hint wpwl-hint-cardHolderError">Invalid card holder</div>");
+						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>");
 						  return false;
 						}
 						return true;

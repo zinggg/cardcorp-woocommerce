@@ -583,7 +583,10 @@ function init_woocommerce_zing()
 						registrations: {
 							requireCvv: true
 						},
-						onReady: function() { 
+						onReady: function(e) { 
+							$(".wpwl-form-card").find(".wpwl-button-pay").on("click", function(e){
+								validateHolder(e);
+							  });
 							$(".wpwl-wrapper-registration-holder").prepend("<span>Card Holder:</span> ");
 							$(".wpwl-wrapper-registration-expiry").prepend("<span>Expiry:</span> ");
 							$(".wpwl-wrapper-registration-number").prepend("<span>Last 4 Digits:</span> ");
@@ -624,8 +627,20 @@ function init_woocommerce_zing()
 						onChangeBrand: function(e){
 							$(".wpwl-brand-custom").css("opacity", "0.2");
 							$(".wpwl-brand-" + e).css("opacity", "5"); 
+						},
+						onBeforeSubmitCard: function(e){
+							return validateHolder(e);
 						}
-					} </script>';
+					}
+					function validateHolder(e){
+						var holder = $(".wpwl-control-cardHolder").val();
+						if (holder.trim().length < 2){
+						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class="wpwl-hint wpwl-hint-cardHolderError">Invalid card holder</div>");
+						  return false;
+						}
+						return true;
+					  }
+					</script>';
 					if ($this->operation == 'test') echo '<div class="testmode">' . 'This is the TEST MODE. No money will be charged' . '</div>';
 					echo '<div id="zing_payment_container">';
 					echo '<form action="' . $this->return_url . '" class="paymentWidgets">' . $this->cards . '</form>';

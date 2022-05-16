@@ -580,8 +580,14 @@ function init_woocommerce_zing()
 						showPlaceholders: true,
 						autofocus : "card.number",
 						showLabels: false,
+						forceCardHolderEqualsBillingName: true,
 						registrations: {
 							requireCvv: true
+						},
+						labels: {givenName: "Firstname", surname: "Lastname"},
+						errorMessages: {
+							givenNameError: "Invalid Firstname",
+							surNameError: "Invalid Lastname",
 						},
 						onReady: function(e) { 
 							$(".wpwl-form-card").find(".wpwl-button-pay").on("click", function(e){

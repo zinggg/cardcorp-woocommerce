@@ -31,9 +31,10 @@ div.form-head {
     float: left;
 }
 
-.wpwl-wrapper-cardHolder { display: flex; }
-input.wpwl-control-givenName { margin-right: 10px; }
-input.wpwl-control-surName { margin-left: 10px; }
+.wpwl-wrapper-cardHolder { display: flex; flex-wrap:wrap; }
+input.wpwl-control-givenName, .wpwl-hint-givenNameError { margin-right: 10px; }
+input.wpwl-control-surName, .wpwl-hint-surNameError { margin-left: 10px; }
+input.wpwl-control-givenName, .wpwl-hint-givenNameError, input.wpwl-control-surName, .wpwl-hint-surNameError{ width: calc(50% - 10px) !important  }
 
 .wpwl-container {
     max-width: 600px;

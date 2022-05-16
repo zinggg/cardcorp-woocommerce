@@ -30,6 +30,11 @@ div.form-head {
     width: 50%;
     float: left;
 }
+
+.wpwl-wrapper-cardHolder { display: flex; }
+input.wpwl-control-givenName { margin-right: 10px; }
+input.wpwl-control-surName { margin-left: 10px; }
+
 .wpwl-container {
     max-width: 600px;
     margin: 0 auto;

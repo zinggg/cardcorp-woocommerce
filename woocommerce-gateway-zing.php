@@ -637,7 +637,7 @@ function init_woocommerce_zing()
 							$(".wpwl-brand-custom").css("opacity", "0.2");
 							$(".wpwl-brand-" + e).css("opacity", "5"); 
 						}
-					},
+					}
 					function validateHolder(e){
 						var card_length = document.querySelector("input[name=\"card.number\"]").value.length;
 						var holder = $(".wpwl-control-cardHolder").val();

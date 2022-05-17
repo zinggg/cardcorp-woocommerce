@@ -580,7 +580,6 @@ function init_woocommerce_zing()
 						showPlaceholders: true,
 						autofocus : "card.number",
 						showLabels: false,
-						forceCardHolderEqualsBillingName: true,
 						registrations: {
 							requireCvv: true
 						},
@@ -593,6 +592,7 @@ function init_woocommerce_zing()
 							$(".wpwl-form-card").find(".wpwl-button-pay").on("click", function(e){
 								validateHolder(e);
 							  });
+
 							$(".wpwl-wrapper-registration-holder").prepend("<span>Card Holder:</span> ");
 							$(".wpwl-wrapper-registration-expiry").prepend("<span>Expiry:</span> ");
 							$(".wpwl-wrapper-registration-number").prepend("<span>Last 4 Digits:</span> ");
@@ -630,11 +630,23 @@ function init_woocommerce_zing()
 					}
 					echo ';' . PHP_EOL;
 					echo '},
+						onBeforeSubmitCard: function(e){
+							return validateHolder(e);
+						},
 						onChangeBrand: function(e){
 							$(".wpwl-brand-custom").css("opacity", "0.2");
 							$(".wpwl-brand-" + e).css("opacity", "5"); 
 						}
-					}
+					},
+					function validateHolder(e){
+						var curentBrand = $('select.wpwl-control-brand > option').filter(':selected').val()
+						var holder = $('.wpwl-control-cardHolder').val();
+						if (curentBrand != 'APPLEPAY' && holder.trim().length < 2){
+						  $('.wpwl-control-cardHolder').addClass('wpwl-has-error').after('<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>');
+						  return false;
+						}
+						return true;
+					  }
 					</script>';
 					if ($this->operation == 'test') echo '<div class="testmode">' . 'This is the TEST MODE. No money will be charged' . '</div>';
 					echo '<div id="zing_payment_container">';

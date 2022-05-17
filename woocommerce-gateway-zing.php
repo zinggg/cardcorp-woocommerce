@@ -583,7 +583,11 @@ function init_woocommerce_zing()
 						registrations: {
 							requireCvv: true
 						},
-						labels: {givenName: "Firstname", surname: "Lastname"},
+						labels: {
+							givenName: "Firstname", 
+							surname: "Lastname",
+							cardHolder: "Cardholder",
+						},
 						errorMessages: {
 							givenNameError: "Invalid Firstname",
 							surNameError: "Invalid Lastname",

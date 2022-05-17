@@ -639,10 +639,10 @@ function init_woocommerce_zing()
 						}
 					},
 					function validateHolder(e){
-						var curentBrand = $('select.wpwl-control-brand > option').filter(':selected').val()
-						var holder = $('.wpwl-control-cardHolder').val();
-						if (curentBrand != 'APPLEPAY' && holder.trim().length < 2){
-						  $('.wpwl-control-cardHolder').addClass('wpwl-has-error').after('<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>');
+						var card_length = document.querySelector("input[name=\"card.number\"]").value.length;
+						var holder = $(".wpwl-control-cardHolder").val();
+						if (card_length > 2 && holder.trim().length < 2){
+						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>");
 						  return false;
 						}
 						return true;

@@ -631,7 +631,9 @@ function init_woocommerce_zing()
 					echo ';' . PHP_EOL;
 					echo '},
 						onBeforeSubmitCard: function(e){
-							return validateHolder(e);
+							if(!e.target.classList.contains("wpwl-apple-pay-button")){
+								return validateHolder(e);
+							}
 						},
 						onChangeBrand: function(e){
 							$(".wpwl-brand-custom").css("opacity", "0.2");
@@ -639,9 +641,8 @@ function init_woocommerce_zing()
 						}
 					}
 					function validateHolder(e){
-						var card_length = document.querySelector("input[name=\"card.number\"]").value.length;
 						var holder = $(".wpwl-control-cardHolder").val();
-						if (card_length > 2 && holder.trim().length < 2){
+						if (holder.trim().length < 2){
 						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>");
 						  return false;
 						}

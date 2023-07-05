@@ -1,11 +1,12 @@
 <?php
 
 /**
- * Plugin Name: Zing Open Woo
- * Plugin URI: https://www.getfoundni.co.uk
- * Author: GFNI 
- * Description: WooCommerce Plugin for accepting payments through Zing OPEN Platform.
- * Version:     1
+ * Plugin Name: Zing.gg Payment Gateway
+ * Plugin URI: https://zing.gg
+ * Author: Zing.gg
+ * Author URI:  * Plugin URI: https://zing.gg
+ * Description: WooCommerce Plugin for accepting payments through Zing.gg payment gateway.
+ * Version: 1.5.10
  *
  * @package Zing Open Woo
  */

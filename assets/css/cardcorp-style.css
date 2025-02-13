@@ -353,15 +353,15 @@ textarea.logs_textarea {
   text-shadow: 1px 0px #9bcbf7;
 }
 
-.cardcorpg-success-text {
+.cardcorp-success-text {
   color: #46b450;
 }
 
-.cardcorpg-error-text {
+.cardcorp-error-text {
   color: #dc3232;
 }
 
-.cardcorpg-warning-text {
+.cardcorp-warning-text {
   color: #ffc107;
 }
 

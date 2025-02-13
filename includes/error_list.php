@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Plugin Name: Zing.gg Payment Gateway
- * Plugin URI: https://zing.gg
- * Author: Zing.gg
- * Author URI:  * Plugin URI: https://zing.gg
- * Description: WooCommerce Plugin for accepting payments through Zing.gg payment gateway.
+ * Plugin Name: Cardcorp Payment Gateway
+ * Plugin URI: https://cardcorp.com
+ * Author: Cardcorp
+ * Author URI:  * Plugin URI: https://cardcorp.com
+ * Description: WooCommerce Plugin for accepting payments through the Cardcorp payment gateway.
  * Version: 1.5.10
  *
- * @package Zing Open Woo
+ * @package Cardcorp Open Woo
  */
 
 $errorMessages = array(

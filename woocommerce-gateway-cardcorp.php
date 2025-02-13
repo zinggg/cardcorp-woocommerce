@@ -658,7 +658,7 @@ function init_woocommerce_cardcorp()
 					echo '<form action="' . $this->return_url . '" class="paymentWidgets">' . $this->cards . '</form>';
 					echo '</div>';
 					echo '<div style="text-align: center; margin-top: 10px; max-width: 200px; margin-left: auto; margin-right: auto;">';
-					echo '<a href="https://Cardcorp" target="_blank">';
+					echo '<a href="https://cardcorp.com" target="_blank">';
 					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/cardcorp-dark.svg" width="100px">';
 					echo '</a>';
 					echo '</div>';
@@ -1097,7 +1097,7 @@ function init_woocommerce_cardcorp()
 	}
 
 	/**
-	 * Add the ZING gateway to WooCommerce
+	 * Add the Cardcorp gateway to WooCommerce
 	 *
 	 * @param array $methods
 	 * @return void

@@ -8,8 +8,8 @@ function add_custom_order_for_preath($actions)
 	if (!$theorder->has_status(array('preauth'))) {
 		return $actions;
 	}
-	//$actions['zing_capture'] = __( 'Zing Capture', 'woocommerce' );
-	//$actions['zing_reverse'] = __( 'Zing Reverse', 'woocommerce' );
+	//$actions['cardcorp_capture'] = __( 'Cardcorp Capture', 'woocommerce' );
+	//$actions['cardcorp_reverse'] = __( 'Cardcorp Reverse', 'woocommerce' );
 	return $actions;
 }
 
@@ -21,7 +21,7 @@ function add_custom_order_for_accepted($actions)
 	if (!$theorder->has_status(array('accepted'))) {
 		return $actions;
 	}
-	//$actions['zing_reverse'] = __( 'Zing Reverse', 'woocommerce' );
+	//$actions['cardcorp_reverse'] = __( 'Cardcorp Reverse', 'woocommerce' );
 	return $actions;
 }
 
@@ -168,7 +168,7 @@ function add_custom_order_status_icon()
 		function check_if_have_18_years()
 		{
 
-			$plugin = new woocommerce_zing();
+			$plugin = new woocommerce_cardcorp();
 
 			if ($plugin->settings['dob'] == 'yes' && $plugin->settings['enabled'] == 'yes') {
 
@@ -202,8 +202,8 @@ function add_custom_order_status_icon()
     }
 
 		//Validation
-		//add_action('woocommerce_checkout_process', 'added_zing_validation');
-		function added_zing_validation()
+		//add_action('woocommerce_checkout_process', 'added_cardcorp_validation');
+		function added_cardcorp_validation()
 		{
 			// Billing Address is too long
 			if (isset($_POST['billing_address_1']) && !empty($_POST['billing_address_1'])) {
@@ -232,7 +232,7 @@ function add_custom_order_status_icon()
 		}
 
 
-		function zing_write_log($message)
+		function cardcorp_write_log($message)
 		{
 			if (is_array($message)) {
 				$message = json_encode($message);
@@ -242,7 +242,7 @@ function add_custom_order_status_icon()
 			fclose($file);
 		}
 
-		function get_zing_logs()
+		function get_cardcorp_logs()
 		{
 			return file_get_contents(plugin_dir_path(__FILE__) . "/../custom_logs.log");
 		}

@@ -15,6 +15,26 @@
 include_once(dirname(__FILE__) . '/includes/cardcorp_additional.php');
 add_action('plugins_loaded', 'init_woocommerce_cardcorp', 0);
 
+// For upgrading customers, update old Zing tokens to Cardcorp on plugin activation
+function update_gateway_id_on_activation() {
+    global $wpdb;
+
+    // Query to find tokens with gateway ID 'zing'
+    $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE gateway_id = 'zing'");
+
+    // If a token with gateway ID 'zing' exists, update it to 'cardcorp'
+    if (!empty($results)) {
+        $wpdb->update(
+            "{$wpdb->prefix}woocommerce_payment_tokens",
+            array('gateway_id' => 'cardcorp'),
+            array('gateway_id' => 'zing')
+        );
+    }
+}
+
+// Hook the function to the plugin activation hook
+register_activation_hook(__FILE__, 'update_gateway_id_on_activation');
+
 /**
  * Init payment gateway
  */

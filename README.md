@@ -10,6 +10,6 @@ More info in: [Cardcorp Payment Gateway](https://www.cardcorp.com 'Cardcorp Paym
 
 <div align="center">
     <a href="https://www.cardcorp.com/" >
-        <img src="https://cardcorp.com/wp-content/uploads/2024/08/Logo_Cardcorp.svg" width="200" >
+        <img src="./assets/images/general/cardcorp-dark.svg" width="200" >
     </a>
 </div>

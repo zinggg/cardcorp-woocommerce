@@ -6,7 +6,7 @@
  * Author: Cardcorp
  * Author URI: https://cardcorp.com
  * Description: WooCommerce plugin for accepting payments through Cardcorp.
- * Version: 1.5.10
+ * Version: 1.6.0
  * Tested up to: 5.4.2
  * WC requires at least: 3.0
  * WC tested up to: 4.2.2

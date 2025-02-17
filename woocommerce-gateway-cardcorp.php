@@ -4,8 +4,8 @@
  * Plugin Name: WooCommerce Cardcorp Gateway
  * Plugin URI: https://cardcorp.com
  * Author: Cardcorp
- * Author URI:  * Plugin URI: https://cardcorp.com
- * Description: WooCommerce Plugin for accepting payments through Cardcorp.
+ * Author URI: https://cardcorp.com
+ * Description: WooCommerce plugin for accepting payments through Cardcorp.
  * Version: 1.5.10
  * Tested up to: 5.4.2
  * WC requires at least: 3.0

@@ -1,16 +1,5 @@
 <?php
 
-/**
- * Plugin Name: Cardcorp Payment Gateway
- * Plugin URI: https://cardcorp.com
- * Author: Cardcorp
- * Author URI:  * Plugin URI: https://cardcorp.com
- * Description: WooCommerce Plugin for accepting payments through the Cardcorp payment gateway.
- * Version: 1.5.10
- *
- * @package Cardcorp Open Woo
- */
-
 $errorMessages = array(
 	'800.150.100' => 'The account holder entered does not match your name. Please use an account that is registered on your name',
 	'800.100.198' => 'Unfortunately, the card/account data you entered was not correct. Please try again',

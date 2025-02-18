@@ -1,30 +1,50 @@
 <?php
 
 /**
- * Plugin Name: WooCommerce Zing Gateway
- * Plugin URI: https://zing.gg
- * Author: Zing.gg
- * Author URI:  * Plugin URI: https://zing.gg
- * Description: WooCommerce Plugin for accepting payments through Zing.gg.
- * Version: 1.5.10
+ * Plugin Name: WooCommerce Cardcorp Gateway
+ * Plugin URI: https://cardcorp.com
+ * Author: Cardcorp
+ * Author URI: https://cardcorp.com
+ * Description: WooCommerce plugin for accepting payments through Cardcorp.
+ * Version: 1.6.0
  * Tested up to: 5.4.2
  * WC requires at least: 3.0
  * WC tested up to: 4.2.2
  */
 
-include_once(dirname(__FILE__) . '/includes/zing_additional.php');
-add_action('plugins_loaded', 'init_woocommerce_zing', 0);
+include_once(dirname(__FILE__) . '/includes/cardcorp_additional.php');
+add_action('plugins_loaded', 'init_woocommerce_cardcorp', 0);
+
+// For upgrading customers, update old Zing tokens to Cardcorp on plugin activation
+function update_gateway_id_on_activation() {
+    global $wpdb;
+
+    // Query to find tokens with gateway ID 'zing'
+    $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}woocommerce_payment_tokens WHERE gateway_id = 'zing'");
+
+    // If a token with gateway ID 'zing' exists, update it to 'cardcorp'
+    if (!empty($results)) {
+        $wpdb->update(
+            "{$wpdb->prefix}woocommerce_payment_tokens",
+            array('gateway_id' => 'cardcorp'),
+            array('gateway_id' => 'zing')
+        );
+    }
+}
+
+// Hook the function to the plugin activation hook
+register_activation_hook(__FILE__, 'update_gateway_id_on_activation');
 
 /**
  * Init payment gateway
  */
 
-function init_woocommerce_zing()
+function init_woocommerce_cardcorp()
 {
 	if (!class_exists('WC_Payment_Gateway')) {
 		return;
 	}
-	class woocommerce_zing extends WC_Payment_Gateway
+	class woocommerce_cardcorp extends WC_Payment_Gateway
 	{
 
 		protected $version = '2.0';
@@ -36,11 +56,11 @@ function init_woocommerce_zing()
 		{
 			global $woocommerce;
 
-			$this->id				= 'zing';
-			$this->method_title 	= 'Zing.gg Payments';
-			$this->method_description = 'Zing.gg Card Payments';
+			$this->id				= 'cardcorp';
+			$this->method_title 	= 'Cardcorp Payments';
+			$this->method_description = 'Cardcorp Payments';
 
-			$icon 				= plugins_url('/assets/images/general/zing-gg-dark.svg', __FILE__);
+			$icon 				= plugins_url('/assets/images/general/cardcorp-dark.svg', __FILE__);
 			$icon_html			= $icon_html = $this->get_icon();
 			$this->icon			= $icon_html;
 			$this->screen 		= plugins_url('screen.png', __FILE__);
@@ -56,11 +76,11 @@ function init_woocommerce_zing()
 			$this->basket			= $this->settings['basket'] == 'yes';
 
 			if ($this->operation == 'live') {
-				$this->zing_url			= "https://eu-prod.oppwa.com";
+				$this->cardcorp_url			= "https://eu-prod.oppwa.com";
 				$this->ACCESS_TOKEN		= $this->settings['access_token'];
 				$this->ENTITY_ID		= $this->settings['entity_id'];
 			} else {
-				$this->zing_url	= "https://eu-test.oppwa.com";
+				$this->cardcorp_url	= "https://eu-test.oppwa.com";
 				$this->ACCESS_TOKEN		= $this->settings['test_access_token'];
 				$this->ENTITY_ID		= $this->settings['test_entity_id'];
 			}
@@ -72,7 +92,7 @@ function init_woocommerce_zing()
 
 			$this->cards_supported			= $this->get_option('card_supported');
 			$this->woocommerce_version 		= $woocommerce->version;
-			$this->return_url   			= add_query_arg('wc-api', 'zing_payment', home_url('/'));
+			$this->return_url   			= add_query_arg('wc-api', 'cardcorp_payment', home_url('/'));
 
 
 			if ($this->settings['dob'] == 'yes' && $this->settings['enabled'] == 'yes') {
@@ -80,26 +100,26 @@ function init_woocommerce_zing()
 			}
 
 			/* Actions */
-			add_action('init', array($this, 'zing_process'));
-			add_action('woocommerce_api_zing_payment', array($this, 'zing_process'));
-			add_action('woocommerce_receipt_zing', array($this, 'receipt_page'));
+			add_action('init', array($this, 'cardcorp_process'));
+			add_action('woocommerce_api_cardcorp_payment', array($this, 'cardcorp_process'));
+			add_action('woocommerce_receipt_cardcorp', array($this, 'receipt_page'));
 			add_action('woocommerce_order_refunded', array($this, 'action_woocommerce_order_refunded'), 10, 2);
-			add_action('woocommerce_order_action_zing_capture', array($this, 'capture_payment'));
-			add_action('woocommerce_order_action_zing_reverse', array($this, 'reverse_payment'));
+			add_action('woocommerce_order_action_cardcorp_capture', array($this, 'capture_payment'));
+			add_action('woocommerce_order_action_cardcorp_reverse', array($this, 'reverse_payment'));
 
 			/* add_action to parse values to thankyou*/
 			add_action('woocommerce_thankyou', array($this, 'report_payment'));
-			//add_action('woocommerce_thankyou', array($this, 'parse_value_zing_success_page'));
+			//add_action('woocommerce_thankyou', array($this, 'parse_value_cardcorp_success_page'));
 
 			/* add_action to parse values when error */
-			add_action('woocommerce_before_checkout_form', array($this, 'parse_value_zing_error'), 10);
+			add_action('woocommerce_before_checkout_form', array($this, 'parse_value_cardcorp_error'), 10);
 
 			/* Lets check for SSL */
 			add_action('admin_notices', array($this, 'do_ssl_check'));
-			wp_enqueue_style('zing_style', plugin_dir_url(__FILE__) . 'assets/css/zing-style.css', array(), $this->version);
+			wp_enqueue_style('cardcorp_style', plugin_dir_url(__FILE__) . 'assets/css/cardcorp-style.css', array(), $this->version);
 
 
-			$tab = isset($_GET['zing_tab']) ? $_GET['zing_tab'] : null;
+			$tab = isset($_GET['cardcorp_tab']) ? $_GET['cardcorp_tab'] : null;
 
 			if ($tab !== null) {
 				$GLOBALS['hide_save_button'] = true;
@@ -124,7 +144,7 @@ function init_woocommerce_zing()
 
 
 		/**
-		 * Woocommerce Admin Panel Option Manage Zing.gg Settings here.
+		 * Woocommerce Admin Panel Option Manage Cardcorp Settings here.
 		 *
 		 * @return void
 		 */
@@ -132,15 +152,15 @@ function init_woocommerce_zing()
 		{
 
 			$default_tab = null;
-			$tab = isset($_GET['zing_tab']) ? $_GET['zing_tab'] : $default_tab; ?>
+			$tab = isset($_GET['cardcorp_tab']) ? $_GET['cardcorp_tab'] : $default_tab; ?>
 
 			<nav class="nav-tab-wrapper">
 
-				<a href="?page=wc-settings&tab=checkout&section=zing" class="nav-tab <?php if ($tab === null) { ?> nav-tab-active <?php } ?>">General Settings</a>
+				<a href="?page=wc-settings&tab=checkout&section=cardcorp" class="nav-tab <?php if ($tab === null) { ?> nav-tab-active <?php } ?>">General Settings</a>
 
-				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=requires" class="nav-tab <?php if ($tab === "requires") { ?> nav-tab-active <?php } ?>">Requires</a>
+				<a href="?page=wc-settings&tab=checkout&section=cardcorp&cardcorp_tab=requires" class="nav-tab <?php if ($tab === "requires") { ?> nav-tab-active <?php } ?>">Requires</a>
 
-				<a href="?page=wc-settings&tab=checkout&section=zing&zing_tab=logs" class="nav-tab <?php if ($tab === "logs") { ?> nav-tab-active <?php } ?>">Logs</a>
+				<a href="?page=wc-settings&tab=checkout&section=cardcorp&cardcorp_tab=logs" class="nav-tab <?php if ($tab === "logs") { ?> nav-tab-active <?php } ?>">Logs</a>
 
 			</nav>
 
@@ -165,24 +185,24 @@ function init_woocommerce_zing()
 		public function generalSettingsTab()
 		{
 		?>
-			<h2>Zing.gg Payment Gateway</h2>
-			<p>Zing.gg Configuration Settings</p>
+			<h2>Cardcorp Payment Gateway</h2>
+			<p>Cardcorp Configuration Settings</p>
 			<table class="form-table">
 				<?php $this->generate_settings_html(); ?>
 			</table>
 		<?php wc_enqueue_js("jQuery( function( $ ) {
-				var zing_test_fields = '#woocommerce_zing_test_entity_id, #woocommerce_zing_test_access_token'; 
-				var zing_live_fields = '#woocommerce_zing_entity_id, #woocommerce_zing_access_token'; 
-				$( '#woocommerce_zing_operation_mode' ).change(function(){ 
-					$( zing_test_fields + ',' + zing_live_fields ).closest( 'tr' ).hide();
+				var cardcorp_test_fields = '#woocommerce_cardcorp_test_entity_id, #woocommerce_cardcorp_test_access_token'; 
+				var cardcorp_live_fields = '#woocommerce_cardcorp_entity_id, #woocommerce_cardcorp_access_token'; 
+				$( '#woocommerce_cardcorp_operation_mode' ).change(function(){ 
+					$( cardcorp_test_fields + ',' + cardcorp_live_fields ).closest( 'tr' ).hide();
 					if ( 'live' === $( this ).val() ) { 
-						$( '#woocommerce_zing_live_credentials, #woocommerce_zing_live_credentials + p' ).show();
-						$( '#woocommerce_zing_test_credentials, #woocommerce_zing_test_credentials + p' ).hide(); 
-						$( zing_live_fields ).closest( 'tr' ).show();
+						$( '#woocommerce_cardcorp_live_credentials, #woocommerce_cardcorp_live_credentials + p' ).show();
+						$( '#woocommerce_cardcorp_test_credentials, #woocommerce_cardcorp_test_credentials + p' ).hide(); 
+						$( cardcorp_live_fields ).closest( 'tr' ).show();
 					} else { 
-						$( '#woocommerce_zing_live_credentials, #woocommerce_zing_live_credentials + p' ).hide();
-						$( '#woocommerce_zing_test_credentials, #woocommerce_zing_test_credentials + p' ).show();
-						$( zing_test_fields ).closest( 'tr' ).show(); 
+						$( '#woocommerce_cardcorp_live_credentials, #woocommerce_cardcorp_live_credentials + p' ).hide();
+						$( '#woocommerce_cardcorp_test_credentials, #woocommerce_cardcorp_test_credentials + p' ).show();
+						$( cardcorp_test_fields ).closest( 'tr' ).show(); 
 					} 
 				}).change();
 			});");
@@ -201,11 +221,11 @@ function init_woocommerce_zing()
 						<td><strong><?= phpversion(); ?></strong></td>
 						<td>
 							<?php if (phpversion() >= '7.0.0') { ?>
-								<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
 							<?php } else if (phpversion() >= '5.2.0') { ?>
-								<span class="dashicons dashicons-info zingg-warning-text"></span>
+								<span class="dashicons dashicons-info cardcorp-warning-text"></span>
 							<?php } else { ?>
-								<span class="dashicons dashicons-no zingg-error-text"></span>
+								<span class="dashicons dashicons-no cardcorp-error-text"></span>
 							<?php } ?>
 						</td>
 					</tr>
@@ -214,11 +234,11 @@ function init_woocommerce_zing()
 						<td><?= $wp_version; ?></td>
 						<td>
 							<?php if ($wp_version >= '5.4.0') { ?>
-								<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
 							<?php } else if ($wp_version >= '5.0.0') { ?>
-								<span class="dashicons dashicons-info zingg-warning-text"></span>
+								<span class="dashicons dashicons-info cardcorp-warning-text"></span>
 							<?php } else { ?>
-								<span class="dashicons dashicons-no zingg-error-text"></span>
+								<span class="dashicons dashicons-no cardcorp-error-text"></span>
 							<?php } ?>
 						</td>
 					</tr>
@@ -227,11 +247,11 @@ function init_woocommerce_zing()
 						<td><?= WC_VERSION; ?></td>
 						<td>
 							<?php if (WC_VERSION >= '4.2.2') { ?>
-								<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
 							<?php } else if (WC_VERSION >= '3.0') { ?>
-								<span class="dashicons dashicons-info zingg-warning-text"></span>
+								<span class="dashicons dashicons-info cardcorp-warning-text"></span>
 							<?php } else { ?>
-								<span class="dashicons dashicons-no zingg-error-text"></span>
+								<span class="dashicons dashicons-no cardcorp-error-text"></span>
 							<?php } ?>
 						</td>
 					</tr>
@@ -240,9 +260,9 @@ function init_woocommerce_zing()
 						<td><?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?> No <?php } else { ?> Yes <?php } ?></td>
 						<td>
 							<?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?>
-								<span class="dashicons dashicons-no zingg-error-text"></span>
+								<span class="dashicons dashicons-no cardcorp-error-text"></span>
 							<?php } else { ?>
-								<span class="dashicons dashicons-yes zingg-success-text"></span>
+								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
 							<?php } ?>
 						</td>
 					</tr>
@@ -257,13 +277,13 @@ function init_woocommerce_zing()
 		?>
 			<h3>Logs</h3>
 
-			<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_zing_logs(); ?></textarea>
+			<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_cardcorp_logs(); ?></textarea>
 
 			<?php
 		}
 
 		/**
-		 * Initialise Zing.gg Woo Plugin Settings Form Fields
+		 * Initialise Cardcorp Woo Plugin Settings Form Fields
 		 *
 		 * @return void
 		 */
@@ -274,7 +294,7 @@ function init_woocommerce_zing()
 				'enabled' 			=> array(
 					'title'				=> 'Enable/Disable',
 					'type' 				=> 'checkbox',
-					'label' 			=> 'Enable Zing.gg',
+					'label' 			=> 'Enable Cardcorp',
 					'default' 			=> 'yes'
 				),
 				'force3ds' 			=> array(
@@ -285,10 +305,10 @@ function init_woocommerce_zing()
 				),
 				'operation_mode' 	=> array(
 					'title' 			=> 'Operation Mode',
-					'default' 			=> 'Payments processed by Zing.gg',
+					'default' 			=> 'Payments processed by Cardcorp',
 					'description' 		=> 'You can switch between different environments, by selecting the corresponding operation mode',
 					'type' 				=> 'select',
-					'class'				=> 'zing_mode',
+					'class'				=> 'cardcorp_mode',
 					'options' 			=> 	array(
 						'test' 				=>  'Test Mode',
 						'live' 				=>  'Live Mode',
@@ -298,47 +318,47 @@ function init_woocommerce_zing()
 					'title' 			=> 'Description',
 					'type' 				=> 'text',
 					'description' 		=> 'This controls the description which the user sees during checkout',
-					'default' 			=> 'Payments proccessed by Zing.gg',
+					'default' 			=> 'Payments proccessed by Cardcorp',
 					'desc_tip'    		=> true
 				),
 				'test_credentials' 	=> array(
 					'title'       		=> 'API Test Credentials',
 					'type'        		=> 'title',
-					'description' 		=> 'Enter your Zing.gg Test API Credentials to process transactions via Zing.gg. 
-										You can get your Zing.gg Test Credentials via 
-										<a href="mailto:support@zing.gg">Zing.gg Support</a>',
+					'description' 		=> 'Enter your Cardcorp Test API Credentials to process transactions via Cardcorp. 
+										You can get your Cardcorp Test Credentials via 
+										<a href="mailto:support@cardcorp.com">Cardcorp Support</a>',
 				),
 				'test_entity_id' 	=> array(
 					'title' 			=> 'Test Entity ID',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Zing.gg Test Entity ID. This is needed in order to take the payment',
+					'description' 		=> 'Please enter your Cardcorp Test Entity ID. This is needed in order to take the payment',
 					'default'			=> '',
 					'desc_tip'    		=> true
 				),
 				'test_access_token' => array(
 					'title' 			=> 'Test Access Token',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Zing.gg Test Access Token. This is needed in order to take the payment',
+					'description' 		=> 'Please enter your Cardcorp Test Access Token. This is needed in order to take the payment',
 					'default' 			=> '',
 					'desc_tip'    		=> true
 				),
 				'live_credentials' 	=> array(
 					'title'       		=> 'API LIVE Credentials',
 					'type'        		=> 'title',
-					'description' 		=> 'Enter your Zing.gg Live API Credentials to process transactions via Zing.gg. You can get your Zing.gg Live Credentials via 
-										<a href="mailto:support@zing.gg">Zing.gg Support</a>',
+					'description' 		=> 'Enter your Cardcorp Live API Credentials to process transactions via Cardcorp. You can get your Cardcorp Live Credentials via 
+										<a href="mailto:support@cardcorp.com">Cardcorp Support</a>',
 				),
 				'entity_id' 		=> array(
 					'title' 			=> 'Entity ID',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Zing.gg Entity ID. This is needed in order to the take payment',
+					'description' 		=> 'Please enter your Cardcorp Entity ID. This is needed in order to the take payment',
 					'default' 			=> '',
 					'desc_tip'    		=> true
 				),
 				'access_token' 		=> array(
 					'title' 			=> 'Access Token',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Zing.gg Access Token. This is needed in order to take the payment',
+					'description' 		=> 'Please enter your Cardcorp Access Token. This is needed in order to take the payment',
 					'default' 			=> '',
 					'desc_tip'    		=> true
 				),
@@ -386,11 +406,11 @@ function init_woocommerce_zing()
 		 */
 		public function get_icon()
 		{
-			$icon_html = $this->zing_get_icon();
+			$icon_html = $this->cardcorp_get_icon();
 			return apply_filters('woocommerce_gateway_icon', $icon_html, $this->id);
 		}
 
-		function zing_get_icon()
+		function cardcorp_get_icon()
 		{
 			$icon_html = '';
 
@@ -408,19 +428,19 @@ function init_woocommerce_zing()
 			return $icon_html;
 		}
 
-		/* Adding Zing.gg Payment Button in checkout page. */
+		/* Adding Cardcorp Payment Button in checkout page. */
 		function payment_fields()
 		{
 			if ($this->description) echo wpautop(wptexturize($this->description));
 		}
 
 		/**
-		 * Creating Zing.gg Payment Form.
+		 * Creating Cardcorp Payment Form.
 		 *
 		 * @param int $order_id
 		 * @return void
 		 */
-		public function generate_zing_payment_form($order_id)
+		public function generate_cardcorp_payment_form($order_id)
 		{
 			global $woocommerce;
 
@@ -453,7 +473,7 @@ function init_woocommerce_zing()
 			/* Required Order Details */
 			$amount 	= $order->get_total();
 			$currency 	= get_woocommerce_currency();
-			$url = $this->zing_url . "/v1/checkouts";
+			$url = $this->cardcorp_url . "/v1/checkouts";
 			$customer =  get_current_user_id() != 0 ? get_current_user_id() : $order_id;
 			$data = "entityId=" . $this->ENTITY_ID
 				. "&currency=" . $currency
@@ -567,9 +587,9 @@ function init_woocommerce_zing()
 					}
 
 					// ICON
-					// <div id=\"d3\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/zing-gg-dark.svg\" alt=\"Secure Payment\"></div>
+					// <div id=\"d3\"><img border=\"0\" src=\"' . plugins_url() . '/'. get_plugin_data( __FILE__ )['TextDomain'] .'/assets/images/general/cardcorp-dark.svg\" alt=\"Secure Payment\"></div>
 					$lang = strtolower(substr(get_bloginfo('language'), 0, 2));
-					echo '<script src="' . $this->zing_url . '/v1/paymentWidgets.js?checkoutId=' . $status->id . '"></script>';
+					echo '<script src="' . $this->cardcorp_url . '/v1/paymentWidgets.js?checkoutId=' . $status->id . '"></script>';
 					echo '<script src="https://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>';
 					echo '<script type="text/javascript">
 						var wpwlOptions = { 
@@ -654,22 +674,22 @@ function init_woocommerce_zing()
 					  }
 					</script>';
 					if ($this->operation == 'test') echo '<div class="testmode">' . 'This is the TEST MODE. No money will be charged' . '</div>';
-					echo '<div id="zing_payment_container">';
+					echo '<div id="cardcorp_payment_container">';
 					echo '<form action="' . $this->return_url . '" class="paymentWidgets">' . $this->cards . '</form>';
 					echo '</div>';
 					echo '<div style="text-align: center; margin-top: 10px; max-width: 200px; margin-left: auto; margin-right: auto;">';
-					echo '<a href="https://Zing.gg" target="_blank">';
-					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/zing-gg-dark.svg" width="100px">';
+					echo '<a href="https://cardcorp.com" target="_blank">';
+					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/cardcorp-dark.svg" width="100px">';
 					echo '</a>';
 					echo '</div>';
 				} else {
 					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
 						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
-						$order->add_order_note(sprintf('Zing.gg Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
-						zing_write_log(sprintf('Zing.gg Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
+						$order->add_order_note(sprintf('Cardcorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
+						cardcorp_write_log(sprintf('Cardcorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
 					} else {
-						$order->add_order_note(sprintf('Zing.gg Configuration error: %s', $gtwresponse['body']));
-						zing_write_log(sprintf('Zing.gg Configuration error: %s', $gtwresponse['body']));
+						$order->add_order_note(sprintf('Cardcorp Configuration error: %s', $gtwresponse['body']));
+						cardcorp_write_log(sprintf('Cardcorp Configuration error: %s', $gtwresponse['body']));
 					}
 					wc_add_notice('Configuration error', 'error');
 					wp_safe_redirect(wc_get_page_permalink('cart'));
@@ -682,12 +702,12 @@ function init_woocommerce_zing()
 		 *
 		 * @return void
 		 */
-		public function zing_process()
+		public function cardcorp_process()
 		{
 			global $woocommerce;
 			global $wpdb;
 			if (isset($_GET['resourcePath'])) {
-				$url = $this->zing_url . $_GET['resourcePath'];
+				$url = $this->cardcorp_url . $_GET['resourcePath'];
 				$url .= "?entityId=" . $this->ENTITY_ID;
 				$head_data = "Bearer " . $this->ACCESS_TOKEN;
 				$gtwresponse = wp_remote_post(
@@ -728,9 +748,9 @@ function init_woocommerce_zing()
 						}
 
 
-						$order->add_order_note(sprintf('Zing.gg Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						$order->add_order_note(sprintf('Cardcorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
 						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
-						zing_write_log(sprintf('Zing.gg Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						cardcorp_write_log(sprintf('Cardcorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
 						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
 
 						$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
@@ -767,9 +787,9 @@ function init_woocommerce_zing()
 						include_once(dirname(__FILE__) . '/includes/error_list.php');
 						$resp_code = $status->result->code;
 						$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $status->result->description;
-						zing_write_log($resp_code_translated);
-						$order->add_order_note(sprintf('Zing.gg Transaction Failed. The Transaction Status %s', $status->result->description));
-						zing_write_log(sprintf('Zing.gg Transaction Failed. The Transaction Status %s', $status->result->description));
+						cardcorp_write_log($resp_code_translated);
+						$order->add_order_note(sprintf('Cardcorp Transaction Failed. The Transaction Status %s', $status->result->description));
+						cardcorp_write_log(sprintf('Cardcorp Transaction Failed. The Transaction Status %s', $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
 						$astrxId = $status->id;
@@ -817,19 +837,19 @@ function init_woocommerce_zing()
 			global $woocommerce;
 			$order = wc_get_order($order_id);
 			$order_data = $order->get_data();
-			$order_trx_id_zing = $order_data['transaction_id'];
+			$order_trx_id_cardcorp = $order_data['transaction_id'];
 			$amount 	= $order->get_total();
 			$currency 	= get_woocommerce_currency();
-			$response = json_decode($this->capture_request($order_trx_id_zing, $amount, $currency));
+			$response = json_decode($this->capture_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
-				$order->add_order_note(sprintf('Zing.gg Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
-				zing_write_log(sprintf('Zing.gg Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
+				$order->add_order_note(sprintf('Cardcorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('Cardcorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
 				$order->update_status('wc-accepted');
 				return true;
 			} else {
-				$order->add_order_note(sprintf('Zing.gg Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
-				zing_write_log(sprintf('Zing.gg Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
+				$order->add_order_note(sprintf('Cardcorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
+				cardcorp_write_log(sprintf('Cardcorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -838,14 +858,14 @@ function init_woocommerce_zing()
 		/**
 		 * Capture Request
 		 *
-		 * @param string $order_trx_id_zing
+		 * @param string $order_trx_id_cardcorp
 		 * @param string $amount
 		 * @param string $currency
 		 * @return string
 		 */
-		function capture_request($order_trx_id_zing, $amount, $currency)
+		function capture_request($order_trx_id_cardcorp, $amount, $currency)
 		{
-			$url = $this->zing_url . "/v1/payments/" . $order_trx_id_zing;
+			$url = $this->cardcorp_url . "/v1/payments/" . $order_trx_id_cardcorp;
 			$data = "entityId=" . $this->ENTITY_ID .
 				"&amount=" . $amount .
 				"&currency=" . $currency .
@@ -877,19 +897,19 @@ function init_woocommerce_zing()
 			global $woocommerce;
 			$order = wc_get_order($order_id);
 			$order_data = $order->get_data();
-			$order_trx_id_zing = $order_data['transaction_id'];
+			$order_trx_id_cardcorp = $order_data['transaction_id'];
 			$amount 	= $order->get_total();
 			$currency 	= get_woocommerce_currency();
-			$response = json_decode($this->reverse_request($order_trx_id_zing, $amount, $currency));
+			$response = json_decode($this->reverse_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
-				$order->add_order_note(sprintf('Zing.gg Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
-				zing_write_log(sprintf('Zing.gg Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
+				$order->add_order_note(sprintf('Cardcorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('Cardcorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
 				$order->update_status('wc-reversed');
 				return true;
 			} else {
-				$order->add_order_note(sprintf('Zing.gg Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
-				zing_write_log(sprintf('Zing.gg Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
+				$order->add_order_note(sprintf('Cardcorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
+				cardcorp_write_log(sprintf('Cardcorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -898,14 +918,14 @@ function init_woocommerce_zing()
 		/**
 		 * Reverse Request
 		 *
-		 * @param string $order_trx_id_zing
+		 * @param string $order_trx_id_cardcorp
 		 * @param string $amount
 		 * @param string $currency
 		 * @return void
 		 */
-		function reverse_request($order_trx_id_zing, $amount, $currency)
+		function reverse_request($order_trx_id_cardcorp, $amount, $currency)
 		{
-			$url = $this->zing_url . "/v1/payments/" . $order_trx_id_zing;
+			$url = $this->cardcorp_url . "/v1/payments/" . $order_trx_id_cardcorp;
 			$data = "entityId=" . $this->ENTITY_ID .
 				"&amount=" . $amount .
 				"&currency=" . $currency .
@@ -934,7 +954,7 @@ function init_woocommerce_zing()
 		 */
 		function receipt_page($order)
 		{
-			$this->generate_zing_payment_form($order);
+			$this->generate_cardcorp_payment_form($order);
 		}
 
 		/**
@@ -950,19 +970,19 @@ function init_woocommerce_zing()
 			global $woocommerce;
 			$order = wc_get_order($order_id);
 			$order_data = $order->get_data();
-			$order_trx_id_zing = $order_data['transaction_id'];
+			$order_trx_id_cardcorp = $order_data['transaction_id'];
 			$amount 	= $order->get_total();
 			$currency 	= get_woocommerce_currency();
-			$response = json_decode($this->refund_request($order_trx_id_zing, $amount, $currency));
+			$response = json_decode($this->refund_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
-				$order->add_order_note(sprintf('Zing.gg Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
-				zing_write_log(sprintf('Zing.gg Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
+				$order->add_order_note(sprintf('Cardcorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('Cardcorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
 				$order->update_status('wc-refunded');
 				return true;
 			} else {
-				$order->add_order_note(sprintf('Zing.gg Refund Request Failed. The Refund Status: %s', $response->result->description));
-				zing_write_log(sprintf('Zing.gg Refund Request Failed. The Refund Status: %s', $response->result->description));
+				$order->add_order_note(sprintf('Cardcorp Refund Request Failed. The Refund Status: %s', $response->result->description));
+				cardcorp_write_log(sprintf('Cardcorp Refund Request Failed. The Refund Status: %s', $response->result->description));
 				return false;
 			}
 			return false;
@@ -971,14 +991,14 @@ function init_woocommerce_zing()
 		/**
 		 * Refund Request
 		 *
-		 * @param string $order_trx_id_zing
+		 * @param string $order_trx_id_cardcorp
 		 * @param string $amount
 		 * @param string $currency
 		 * @return void
 		 */
-		function refund_request($order_trx_id_zing, $amount, $currency)
+		function refund_request($order_trx_id_cardcorp, $amount, $currency)
 		{
-			$url = $this->zing_url . "/v1/payments/" . $order_trx_id_zing;
+			$url = $this->cardcorp_url . "/v1/payments/" . $order_trx_id_cardcorp;
 			$data = "entityId=" . $this->ENTITY_ID .
 				"&amount=" . $amount .
 				"&currency=" . $currency .
@@ -1006,7 +1026,7 @@ function init_woocommerce_zing()
 		 * @param int $order_id
 		 * @return void
 		 */
-		function parse_value_zing_error($order_id)
+		function parse_value_cardcorp_error($order_id)
 		{
 			if (isset($_REQUEST['astrxId'])) {
 				$astrxId = $_REQUEST['astrxId'];
@@ -1014,7 +1034,7 @@ function init_woocommerce_zing()
 				include_once(dirname(__FILE__) . '/includes/error_list.php');
 				$resp_code = $gwresponse->result->code;
 				$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $gwresponse->result->description;
-				zing_write_log($resp_code_translated); ?>
+				cardcorp_write_log($resp_code_translated); ?>
 
 				<div class="woocommerce">
 					<ul class="woocommerce-error" role="alert">
@@ -1030,7 +1050,7 @@ function init_woocommerce_zing()
 		 * @param int $order_id
 		 * @return void
 		 */
-		function parse_value_zing_success_page($order_id)
+		function parse_value_cardcorp_success_page($order_id)
 		{
 			if (isset($_REQUEST['astrxId'])) {
 				$astrxId = $_REQUEST['astrxId'];
@@ -1070,14 +1090,14 @@ function init_woocommerce_zing()
 
 
 		/**
-		 * Report Payment to Zing
+		 * Report Payment to Cardcorp
 		 *
 		 * @param int $order_id
 		 * @return void
 		 */
 		function report_payment($order_id)
 		{
-			$url = $this->zing_url . "/v1/query/";
+			$url = $this->cardcorp_url . "/v1/query/";
 			$url .= $_REQUEST['astrxId'];
 			$url .= "?entityId=" . $this->ENTITY_ID;
 			$head_data = "Bearer " . $this->ACCESS_TOKEN;
@@ -1097,15 +1117,15 @@ function init_woocommerce_zing()
 	}
 
 	/**
-	 * Add the ZING gateway to WooCommerce
+	 * Add the Cardcorp gateway to WooCommerce
 	 *
 	 * @param array $methods
 	 * @return void
 	 */
-	function add_zing_gateway($methods)
+	function add_cardcorp_gateway($methods)
 	{
-		$methods[] = 'woocommerce_zing';
+		$methods[] = 'woocommerce_cardcorp';
 		return $methods;
 	}
-	add_filter('woocommerce_payment_gateways', 'add_zing_gateway');
+	add_filter('woocommerce_payment_gateways', 'add_cardcorp_gateway');
 }

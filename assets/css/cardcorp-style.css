@@ -1,0 +1,521 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto);
+
+.wpwl-form {
+  max-width: 480px !important;
+  margin: 0 auto 2px !important;
+  padding: 15px !important;
+  color: #777 !important;
+  border-radius: 4px !important;
+}
+.wpwl-form-card .wpwl-group,
+.wpwl-form-directDebit .wpwl-group {
+  padding: 10px;
+  margin: 0;
+}
+.wpwl-form-card .wpwl-group-cvv,
+.wpwl-form-card .wpwl-group-expiry,
+.wpwl-form-directDebit .wpwl-group-cvv,
+.wpwl-form-directDebit .wpwl-group-expiry {
+  width: 50%;
+  float: left;
+}
+
+.wpwl-wrapper-cardHolder {
+  display: flex;
+  flex-wrap: wrap;
+}
+input.wpwl-control-givenName,
+.wpwl-hint-givenNameError {
+  margin-right: 10px;
+}
+input.wpwl-control-surName,
+.wpwl-hint-surNameError {
+  margin-left: 10px;
+}
+input.wpwl-control-givenName,
+.wpwl-hint-givenNameError,
+input.wpwl-control-surName,
+.wpwl-hint-surNameError {
+  width: calc(50% - 10px) !important;
+}
+
+.wpwl-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.wpwl-container-virtualAccount-APPLEPAY {
+  padding-top: 0px !important;
+  margin-top: 0px !important;
+}
+
+.wpwl-form-virtualAccount-APPLEPAY .wpwl-group-button {
+  text-align: right;
+  padding-top: 0px !important;
+  margin-top: 0px !important;
+}
+
+.wpwl-control {
+  height: 44px !important;
+  font-family: Roboto, sans-serif !important;
+  font-size: 16px;
+  color: #777 !important;
+  background-color: #fff !important;
+  border: 1px solid #ddd !important;
+  border-radius: 1px !important;
+  padding: 4px !important;
+  width: 100% !important;
+  box-shadow: none !important;
+}
+.wpwl-control-cardHolder::placeholder,
+.wpwl-control-expiry::placeholder {
+  color: #777;
+  font-family: Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+}
+.wpwl-group.wpwl-group-cardHolder {
+  clear: left;
+}
+.wpwl-group.wpwl-group-brand {
+  position: relative;
+}
+.wpwl-group-button {
+  padding: 20px 10px !important;
+}
+.wpwl-group.wpwl-group-submit.wpwl-clearfix {
+  clear: both;
+}
+.wpwl-button {
+  margin-top: 10px !important;
+  padding: 0 15px;
+}
+.btn_cancel {
+  float: left;
+  color: #fff;
+  background-color: #aaa;
+  border-color: #999;
+  border-radius: 4px;
+}
+.btn_cancel:hover {
+  color: #fff;
+  background-color: #999;
+}
+.testmode {
+  margin: 0 auto 1px auto !important;
+  padding: 3px 0 3px 0;
+  width: 100%;
+  font-size: 13px !important;
+  font-weight: 700;
+  color: red !important;
+  background-color: #fba;
+  text-align: center;
+  border-bottom: red solid 3px;
+  max-width: 480px;
+}
+.wpwl-brand,
+.wpwl-label-brand,
+.wpwl-wrapper-brand {
+  display: none;
+}
+
+.wpwl-brand,
+.wpwl-label-brand,
+.wpwl-wrapper-brand {
+  display: none;
+}
+
+.wpwl-control-cvv {
+  border-radius: 6px !important;
+}
+
+#wpwl-registrations .wpwl-brand,
+#wpwl-registrations .wpwl-label-brand,
+#wpwl-registrations .wpwl-wrapper-brand {
+  display: block;
+}
+
+#wpwl-registrations .wpwl-wrapper-registration-details {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+#wpwl-registrations .wpwl-brand-VISA {
+  margin-top: 4px;
+}
+
+#wpwl-registrations .wpwl-registration {
+  display: flex;
+}
+
+.wpwl-wrapper-submit {
+  display: flex;
+  flex-flow: wrap;
+}
+.wpwl-wrapper-submit div,
+.wpwl-wrapper-submit a {
+  flex: 0 0 50%;
+}
+#wpwl-registrations .wpwl-wrapper-registration-cvv {
+  width: 19%;
+}
+#wpwl-registrations .wpwl-group-registration {
+  border: 2px solid #cccccc;
+  border-radius: 10px;
+}
+#wpwl-registrations .wpwl-selected {
+  border-color: #28a745 !important;
+}
+#wpwl-registrations .wpwl-wrapper-registration {
+  color: #383838;
+}
+#wpwl-registrations .wpwl-wrapper-registration span {
+  font-size: small;
+  color: #666666;
+}
+
+.wpwl-popover-content {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  #wpwl-registrations .wpwl-registration {
+    flex-wrap: wrap;
+  }
+  #wpwl-registrations .wpwl-wrapper-registration-cvv {
+    width: 100%;
+  }
+  #wpwl-registrations iframe.wpwl-control-cvv {
+    width: 50% !important;
+    margin-left: auto;
+  }
+}
+
+.wpwl-wrapper-submit button {
+  flex: 0 0 30%;
+  margin-left: auto;
+}
+
+.wpwl-brand-card {
+  float: right;
+  width: 38px;
+  height: 25px;
+  margin-left: 1px;
+  background-size: 38px 25px !important;
+}
+.wpwl-brand-GENERIC {
+  background: url(../images/general/generic.svg) no-repeat top left;
+}
+.wpwl-brand-VISA {
+  background: url(../images/general/visa.svg) no-repeat top left;
+}
+.wpwl-brand-MASTER {
+  background: url(../images/general/master.svg) no-repeat top left;
+}
+.wpwl-brand-MAESTRO {
+  background: url(../images/general/maestro.svg) no-repeat top left;
+}
+.wpwl-brand-AMEX {
+  background: url(../images/general/amex.svg) no-repeat top left;
+}
+.wpwl-brand-DINERS {
+  background: url(../images/general/diners.svg) no-repeat top left;
+}
+.wpwl-brand-JCB {
+  background: url(../images/general/jcb.svg) no-repeat top left;
+}
+.wpwl-wrapper {
+  width: 100%;
+}
+div#d1,
+div#d2,
+div#d3 {
+  width: 50%;
+}
+div#d1 img,
+div#d2 img,
+div#d3 img {
+  display: block;
+  height: 40px;
+}
+div#banner {
+  display: flex;
+  margin-top: 20px;
+}
+div#d1 img,
+div#d2 img,
+div#d3 img {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #ddd;
+  padding: 5px;
+  border-radius: 5px;
+  width: 100%;
+}
+div#d1,
+div#d2 {
+  padding-right: 2%;
+}
+div#d3 {
+  padding-right: 0;
+}
+#cardcorp_payment_mode.test {
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background: red;
+  padding: 0 10px 10px;
+}
+#cardcorp_payment_mode.live {
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  background: #fff;
+}
+#cardcorp_payment_container {
+  background: #fff;
+}
+span.testmode {
+  font-size: small;
+  color: #fff;
+  text-align: center;
+}
+div#cardcorp_merchant_info {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 0 10px;
+  font-family: Roboto, sans-serif;
+  font-size: 13px;
+}
+div#cardcorp_banner {
+  max-width: 1074px;
+  display: flex;
+  margin: 10px auto;
+  padding-bottom: 20px;
+}
+#cardcorp_banner .cardcorp {
+  width: 20%;
+  border-right: solid #ccc 2px;
+}
+#cardcorp_banner .cardcorp_threeds {
+  width: 25%;
+  display: flex;
+  border-right: solid #ccc 2px;
+}
+#cardcorp_banner .cardcorp_cards {
+  width: 35%;
+  display: flex;
+  border-right: solid #ccc 2px;
+}
+#cardcorp_banner .cardcorp_bank {
+  width: 20%;
+}
+.cardcorp img {
+  height: 30px !important;
+  display: block;
+  margin: auto;
+}
+.cardcorp_threeds img {
+  width: 40%;
+  height: 25px !important;
+  display: block;
+  margin: auto;
+  margin-top: 3px;
+}
+.cardcorp_cards img {
+  height: 30px !important;
+  display: block;
+  margin: auto;
+}
+.cardcorp_bank img {
+  height: 30px !important;
+  display: block;
+  margin: auto;
+  max-width: 80%;
+}
+
+textarea.logs_textarea {
+  background: rgb(35 40 45);
+  color: #fff;
+  text-shadow: 1px 0px #9bcbf7;
+}
+
+.cardcorp-success-text {
+  color: #46b450;
+}
+
+.cardcorp-error-text {
+  color: #dc3232;
+}
+
+.cardcorp-warning-text {
+  color: #ffc107;
+}
+
+table.requires-table {
+  min-width: 400px;
+}
+
+table.requires-table td {
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  div#cardcorp_banner {
+    flex-flow: row wrap;
+    display: flex;
+  }
+  #cardcorp_banner .cardcorp {
+    order: 2;
+    width: 35%;
+    padding-left: 10px;
+    border: none;
+  }
+  #cardcorp_banner .cardcorp_threeds {
+    order: 3;
+    width: 30%;
+    padding-left: 5px;
+    padding-right: 5px;
+    display: inline-flex;
+    border: none;
+  }
+  #cardcorp_banner .cardcorp_cards {
+    order: 1;
+    width: 100%;
+    border: none;
+    padding: 0 5px 10px 5px;
+  }
+  #cardcorp_banner .cardcorp_bank {
+    order: 4;
+    width: 35%;
+    display: block;
+  }
+  .cardcorp img {
+    width: unset;
+    height: 20px !important;
+    display: block;
+  }
+  .cardcorp_cards img {
+    height: 25px !important;
+  }
+  .cardcorp_threeds img {
+    width: 40%;
+    height: 20px !important;
+  }
+  .cardcorp_bank img {
+    width: unset;
+    height: 20px !important;
+    display: block;
+  }
+  .wpwl-control {
+    height: 50px !important;
+    border-radius: 5px !important;
+  }
+  .wpwl-group-brand {
+    padding: 1px 1px 5px 1px !important;
+  }
+  .wpwl-button-pay {
+    width: 150px;
+    height: 50px;
+    padding: 0.8em 1.8em !important;
+    margin: 0 auto;
+  }
+  .wpwl-brand-card {
+    float: right;
+    width: 53px;
+    height: 30px;
+    margin-left: 1px;
+  }
+  .wpwl-brand-custom {
+    background-size: 53px 30px;
+  }
+  .wpwl-label-brand,
+  .wpwl-wrapper-brand {
+    display: none;
+  }
+  .wpwl-button-cancel {
+    display: none;
+    padding: 0.8em 1.8em !important;
+  }
+
+  .wpwl-form-virtualAccount-APPLEPAY {
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+  }
+  .wpwl-form-virtualAccount-APPLEPAY > .wpwl-group-button,
+  #wpwl-form-virtualAccount-APPLEPAY > form > div {
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+    text-align: center !important;
+  }
+
+  .wpwl-apple-pay-button {
+    margin: 0 auto;
+    width: 150px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .cardcorp-basket {
+    padding-top: 2rem;
+    border-top: 1px solid black !important;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid black !important;
+    display: flex !important;
+    line-height: 2.8rem;
+  }
+  .cardcorp-basket .on {
+    display: block !important;
+    padding: 0;
+  }
+  .cardcorp-basket .product-thumbnail img {
+    margin: 0;
+  }
+}
+
+.wpwl-form.wpwl-form-virtualAccount-APPLEPAY {
+  padding: 0 15px !important;
+  margin: 0 auto !important;
+}
+.wpwl-group-submit {
+  padding-bottom: 0 !important;
+}
+
+.wpwl-button-pay,
+.wpwl-apple-pay-button {
+  flex: none !important;
+  width: 100%;
+  padding: 0.5rem 1rem !important;
+  margin: 0 auto !important;
+  height: 48px;
+}
+.wpwl-button-pay {
+  margin-top: 1rem !important;
+}
+
+.wpwl-wrapper > .wpwl-icon {
+  right: 7px !important;
+  top: 7px !important;
+}
+
+.wpwl-form {
+  position: relative;
+}
+.wpwl-group-brand {
+  padding: 0 10px !important;
+  position: absolute !important;
+  width: auto;
+  right: 25px;
+  top: 12px;
+  z-index: 2;
+}
+.wpwl-brand-MAESTRO {
+  display: none !important;
+}
+
+.wpwl-control,
+.wpwl-control-cvv {
+  border-radius: 1px !important;
+}

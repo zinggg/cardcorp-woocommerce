@@ -1,16 +1,5 @@
 <?php
 
-/**
- * Plugin Name: Zing.gg Payment Gateway
- * Plugin URI: https://zing.gg
- * Author: Zing.gg
- * Author URI:  * Plugin URI: https://zing.gg
- * Description: WooCommerce Plugin for accepting payments through Zing.gg payment gateway.
- * Version: 1.5.10
- *
- * @package Zing Open Woo
- */
-
 $errorMessages = array(
 	'800.150.100' => 'The account holder entered does not match your name. Please use an account that is registered on your name',
 	'800.100.198' => 'Unfortunately, the card/account data you entered was not correct. Please try again',

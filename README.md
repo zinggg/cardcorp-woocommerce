@@ -1,13 +1,15 @@
-### WooCommerce Zing.gg Payment Gateway
+### WooCommerce Cardcorp Payment Gateway
 
-Accept Visa, MasterCard, American Express, Discover, JCB and more directly on your store with the Zing payment gateway for WooCommerce
+Accept **Visa, MasterCard, American Express, Discover, JCB** and more directly on your store with the CardCorp payment gateway for WooCommerce.
 
--The Zing.gg plugin extends WooCommerce allowing you to take payments directly on your store via Zing.gg API.
+- The Cardcorp plugin extends WooCommerce allowing you to take payments directly on your store via the Cardcorp API.
 
-More info in: [Zing.gg Payment Gateway](https://www.zing.gg "Zing.gg Payment Gateway")
+More info in: [Cardcorp Payment Gateway](https://www.cardcorp.com 'Cardcorp Payment Gateway')
 
+---
 
-------------
-
-
-[![](https://zing.gg/packs/media/images/public_pages/brand/zing-gg-dark-dd6352061e7352dc10446cb557312946.svg)](https://www.zing.gg "![](https://zing.gg/packs/media/images/public_pages/brand/zing-gg-dark-dd6352061e7352dc10446cb557312946.svg)")
+<div align="center">
+    <a href="https://www.cardcorp.com/" >
+        <img src="./assets/images/general/cardcorp-dark.svg" width="200" >
+    </a>
+</div>

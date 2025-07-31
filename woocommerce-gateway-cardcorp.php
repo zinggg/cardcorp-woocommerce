@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Plugin Name: WooCommerce Cardcorp Gateway
+ * Plugin Name: Cardcorp Gateway
  * Plugin URI: https://cardcorp.com
  * Author: Cardcorp
  * Author URI: https://cardcorp.com
  * Description: WooCommerce plugin for accepting payments through Cardcorp.
- * Version: 1.6.1
- * Tested up to: 5.4.2
+ * Version: 1.6.2
+ * Tested up to: 6.8.2
  * WC requires at least: 3.0
- * WC tested up to: 4.2.2
+ * WC tested up to: 10.02
  */
 
 include_once(dirname(__FILE__) . '/includes/cardcorp_additional.php');
@@ -205,6 +205,21 @@ function init_woocommerce_cardcorp()
 						$( cardcorp_test_fields ).closest( 'tr' ).show(); 
 					} 
 				}).change();
+
+				function toggleGooglePayField() {
+                    var selectedCards = $('#woocommerce_cardcorp_card_supported').val() || [];
+                    var operationMode = $('#woocommerce_cardcorp_operation_mode').val();
+            
+                    if (selectedCards.includes('GOOGLEPAY') && operationMode === 'live') {
+                        $('#woocommerce_cardcorp_googlepay_mid').closest('tr').show();
+                    } else {
+                        $('#woocommerce_cardcorp_googlepay_mid').closest('tr').hide();
+                    }
+               }
+        
+                $('#woocommerce_cardcorp_card_supported').on('change', toggleGooglePayField);
+                $('#woocommerce_cardcorp_operation_mode').on('change', toggleGooglePayField);
+                toggleGooglePayField(); 
 			});");
 		}
 
@@ -318,7 +333,7 @@ function init_woocommerce_cardcorp()
 					'title' 			=> 'Description',
 					'type' 				=> 'text',
 					'description' 		=> 'This controls the description which the user sees during checkout',
-					'default' 			=> 'Payments proccessed by Cardcorp',
+					'default' 			=> 'Payments processed by Cardcorp',
 					'desc_tip'    		=> true
 				),
 				'test_credentials' 	=> array(
@@ -362,6 +377,13 @@ function init_woocommerce_cardcorp()
 					'default' 			=> '',
 					'desc_tip'    		=> true
 				),
+				'googlepay_mid' 		=> array(
+					'title' 			=> 'Google Pay MID',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter your approved Google merchant identifier.',
+					'default' 			=> '',
+					'desc_tip'    		=> true,
+				),
 				'hr' 				=> array(
 					'title' 			=> '<hr>',
 					'type' 				=> 'title',
@@ -394,6 +416,7 @@ function init_woocommerce_cardcorp()
 						'MASTER' 		=> 'MASTER',
 						'MAESTRO' 		=> 'MAESTRO',
 						'APPLEPAY' 		=> 'APPLEPAY',
+						'GOOGLEPAY' 	=> 'GOOGLEPAY',
 					)
 				)
 			);
@@ -596,6 +619,25 @@ function init_woocommerce_cardcorp()
 						var wpwlOptions = { 
 						style: "plain",' . PHP_EOL;
 					echo 'locale: "' . $lang . '",' . PHP_EOL;
+					if (strpos($this->cards, 'APPLEPAY') !== false && $i == 0) {
+						echo 'applePay: {' . PHP_EOL;
+						echo '    merchantIdentifier: "' . esc_js($this->ENTITY_ID) . '",' . PHP_EOL;
+						echo '    checkAvailability: "applePayCapabilities",' . PHP_EOL;
+						echo '    buttonType: "pay",' . PHP_EOL;
+						echo '    buttonColor: "white"' . PHP_EOL;
+						echo '},' . PHP_EOL;
+					}
+					if (strpos($this->cards, 'GOOGLEPAY') !== false && $i == 0) {
+						echo 'googlePay: {' . PHP_EOL;
+						echo '    gatewayMerchantId: "' . esc_js($this->ENTITY_ID) . '",' . PHP_EOL;
+						
+						if ($this->operation == 'live') {
+							echo '    merchantId: "' . esc_js($this->settings['googlepay_mid']) . '",' . PHP_EOL;
+						}
+						echo '    buttonType: "pay",' . PHP_EOL;
+						echo '    buttonSizeMode: "fill",' . PHP_EOL;
+						echo '},' . PHP_EOL;
+					}
 					echo 'showCVVHint: true,
 						brandDetection: true,
 						showPlaceholders: true,
@@ -609,15 +651,13 @@ function init_woocommerce_cardcorp()
 							surname: "Lastname",
 							cardHolder: "Cardholder",
 						},
+						allowEmptyCardHolderName: false,
 						errorMessages: {
+						    cardHolderError: "Invalid card holder",
 							givenNameError: "Invalid Firstname",
 							surNameError: "Invalid Lastname",
 						},
 						onReady: function(e) { 
-							$(".wpwl-form-card").find(".wpwl-button-pay").on("click", function(e){
-								validateHolder(e);
-							  });
-
 							$(".wpwl-wrapper-registration-holder").prepend("<span>Card Holder:</span> ");
 							$(".wpwl-wrapper-registration-expiry").prepend("<span>Expiry:</span> ");
 							$(".wpwl-wrapper-registration-number").prepend("<span>Last 4 Digits:</span> ");
@@ -655,24 +695,11 @@ function init_woocommerce_cardcorp()
 					}
 					echo ';' . PHP_EOL;
 					echo '},
-						onBeforeSubmitCard: function(e){
-							if(!e.target.classList.contains("wpwl-apple-pay-button")){
-								return validateHolder(e);
-							}
-						},
 						onChangeBrand: function(e){
 							$(".wpwl-brand-custom").css("opacity", "0.2");
 							$(".wpwl-brand-" + e).css("opacity", "5"); 
 						}
 					}
-					function validateHolder(e){
-						var holder = $(".wpwl-control-cardHolder").val();
-						if (holder.trim().length < 2){
-						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>");
-						  return false;
-						}
-						return true;
-					  }
 					</script>';
 					if ($this->operation == 'test') echo '<div class="testmode">' . 'This is the TEST MODE. No money will be charged' . '</div>';
 					echo '<div id="cardcorp_payment_container">';

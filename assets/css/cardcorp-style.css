@@ -3,7 +3,7 @@
 .wpwl-form {
   max-width: 480px !important;
   margin: 0 auto 2px !important;
-  padding: 15px !important;
+  padding: 15px 15px 0px 15px;
   color: #777 !important;
   border-radius: 4px !important;
 }
@@ -44,17 +44,6 @@ input.wpwl-control-surName,
   margin: 0 auto;
 }
 
-.wpwl-container-virtualAccount-APPLEPAY {
-  padding-top: 0px !important;
-  margin-top: 0px !important;
-}
-
-.wpwl-form-virtualAccount-APPLEPAY .wpwl-group-button {
-  text-align: right;
-  padding-top: 0px !important;
-  margin-top: 0px !important;
-}
-
 .wpwl-control {
   height: 44px !important;
   font-family: Roboto, sans-serif !important;
@@ -82,7 +71,10 @@ input.wpwl-control-surName,
   position: relative;
 }
 .wpwl-group-button {
-  padding: 20px 10px !important;
+  padding: 0px !important;
+  margin: auto !important;
+  width: 100%;
+  max-width: 430px;
 }
 .wpwl-group.wpwl-group-submit.wpwl-clearfix {
   clear: both;
@@ -418,7 +410,6 @@ table.requires-table td {
   }
   .wpwl-button-pay {
     width: 150px;
-    height: 50px;
     padding: 0.8em 1.8em !important;
     margin: 0 auto;
   }
@@ -438,22 +429,6 @@ table.requires-table td {
   .wpwl-button-cancel {
     display: none;
     padding: 0.8em 1.8em !important;
-  }
-
-  .wpwl-form-virtualAccount-APPLEPAY {
-    margin-top: 0px !important;
-    padding-top: 0px !important;
-  }
-  .wpwl-form-virtualAccount-APPLEPAY > .wpwl-group-button,
-  #wpwl-form-virtualAccount-APPLEPAY > form > div {
-    margin-top: 0px !important;
-    padding-top: 0px !important;
-    text-align: center !important;
-  }
-
-  .wpwl-apple-pay-button {
-    margin: 0 auto;
-    width: 150px;
   }
 }
 
@@ -475,24 +450,42 @@ table.requires-table td {
   }
 }
 
-.wpwl-form.wpwl-form-virtualAccount-APPLEPAY {
-  padding: 0 15px !important;
-  margin: 0 auto !important;
+.wpwl-form-virtualAccount {
+  padding: 0px !important;
 }
+
+.wpwl-container-virtualAccount-APPLEPAY,
+.wpwl-container-virtualAccount-GOOGLEPAY {
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  margin: 15px auto;
+}
+
 .wpwl-group-submit {
   padding-bottom: 0 !important;
 }
 
 .wpwl-button-pay,
-.wpwl-apple-pay-button {
+.gpay-card-info-container {
   flex: none !important;
   width: 100%;
-  padding: 0.5rem 1rem !important;
   margin: 0 auto !important;
-  height: 48px;
+  border-radius: 0.375rem !important;
 }
 .wpwl-button-pay {
+  height: 50px;
   margin-top: 1rem !important;
+}
+apple-pay-button {
+  width: 100%;
+  --apple-pay-button-height: 40px;
+  --apple-pay-button-border-radius: 0.375rem;
+}
+
+.gpay-card-info-container {
+  height: 47px !important;
 }
 
 .wpwl-wrapper > .wpwl-icon {
@@ -502,6 +495,7 @@ table.requires-table td {
 
 .wpwl-form {
   position: relative;
+  width: 100%;
 }
 .wpwl-group-brand {
   padding: 0 10px !important;

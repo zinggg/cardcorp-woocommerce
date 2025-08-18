@@ -9,7 +9,7 @@
  * Version: 1.6.2
  * Tested up to: 6.8.2
  * WC requires at least: 3.0
- * WC tested up to: 10.02
+ * WC tested up to: 9.9.5
  */
 
 include_once(dirname(__FILE__) . '/includes/cardcorp_additional.php');

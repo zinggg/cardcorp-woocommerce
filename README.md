@@ -6,6 +6,8 @@ Accept **Visa, MasterCard, American Express, Discover, JCB** and more directly o
 
 More info in: [Cardcorp Payment Gateway](https://www.cardcorp.com 'Cardcorp Payment Gateway')
 
+**Compatibility Note**: This plugin is currently incompatible with WooCommerce 10 and above. Kindly use WooCommerce 9.9.5 in the meantime.
+
 ---
 
 <div align="center">

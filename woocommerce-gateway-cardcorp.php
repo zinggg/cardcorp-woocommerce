@@ -13,6 +13,13 @@
  */
 
 include_once(dirname(__FILE__) . '/includes/cardcorp_additional.php');
+
+add_action('before_woocommerce_init', function () {
+	if (class_exists('\\Automattic\\WooCommerce\\Utilities\\FeaturesUtil')) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+	}
+});
+
 add_action('plugins_loaded', 'init_woocommerce_cardcorp', 0);
 
 // For upgrading customers, update old Zing tokens to Cardcorp on plugin activation
@@ -103,7 +110,6 @@ function init_woocommerce_cardcorp()
 			add_action('init', array($this, 'cardcorp_process'));
 			add_action('woocommerce_api_cardcorp_payment', array($this, 'cardcorp_process'));
 			add_action('woocommerce_receipt_cardcorp', array($this, 'receipt_page'));
-			add_action('woocommerce_order_refunded', array($this, 'action_woocommerce_order_refunded'), 10, 2);
 			add_action('woocommerce_order_action_cardcorp_capture', array($this, 'capture_payment'));
 			add_action('woocommerce_order_action_cardcorp_reverse', array($this, 'reverse_payment'));
 
@@ -754,14 +760,15 @@ function init_woocommerce_cardcorp()
 						cardcorp_write_log(sprintf('Cardcorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
 						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
 
-						$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
-						$bank_code = $status->resultDetails;
-						$astrxId = $status->id;
+					$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
+					$bank_code = $status->resultDetails;
+					$astrxId = $status->id;
 
-						$order->payment_complete($status->id);
-						update_post_meta($order->id, 'bank_code', $bank_code);
-						update_post_meta($order->id, 'AS-TrxId', $astrxId);
-						WC()->cart->empty_cart();
+					$order->payment_complete($status->id);
+					$order->update_meta_data('bank_code', $bank_code);
+					$order->update_meta_data('AS-TrxId', $astrxId);
+					$order->save();
+					WC()->cart->empty_cart();
 
 						/* Add content to the WC emails. */
 						$query = parse_url($this->get_return_url($order), PHP_URL_QUERY);
@@ -793,13 +800,13 @@ function init_woocommerce_cardcorp()
 						cardcorp_write_log(sprintf('Cardcorp Transaction Failed. The Transaction Status %s', $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
-						$astrxId = $status->id;
-						$query = parse_url(wc_get_checkout_url($order), PHP_URL_QUERY);
-						if ($query) {
-							$url = wc_get_checkout_url($order) . '&astrxId=' . $astrxId;
-						} else {
-							$url = wc_get_checkout_url($order) . '?astrxId=' . $astrxId;
-						}
+					$astrxId = $status->id;
+					$query = parse_url(wc_get_checkout_url(), PHP_URL_QUERY);
+					if ($query) {
+						$url = wc_get_checkout_url() . '&astrxId=' . $astrxId;
+					} else {
+						$url = wc_get_checkout_url() . '?astrxId=' . $astrxId;
+					}
 						wp_redirect($url);
 						exit;
 					}
@@ -816,10 +823,9 @@ function init_woocommerce_cardcorp()
 		function process_payment($order_id)
 		{
 			$order = new WC_Order($order_id);
-			if ($this->woocommerce_version >= 2.1) {
-				$redirect = $order->get_checkout_payment_url(true);
-			} else {
-				$redirect = add_query_arg('order', $order->id, add_query_arg('key', $order->order_key, get_permalink(get_option('woocommerce_pay_page_id'))));
+			$redirect = $order->get_checkout_payment_url(true);
+			if (!$redirect) {
+				$redirect = wc_get_checkout_url();
 			}
 			return array(
 				'result' 	=> 'success',

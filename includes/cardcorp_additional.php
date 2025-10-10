@@ -197,8 +197,13 @@ function add_custom_order_status_icon()
 
     add_action('woocommerce_checkout_update_order_meta', 'check_client_age_field_update_order_meta', 10, 1);
     function  check_client_age_field_update_order_meta( $order_id ) {
-        if ( ! empty( $_POST['have_18_years'] ) )
-            update_post_meta( $order_id, 'have_18_years', $_POST['have_18_years'] );
+        if ( ! empty( $_POST['have_18_years'] ) ) {
+            $order = wc_get_order( $order_id );
+            if ( $order ) {
+                $order->update_meta_data( 'have_18_years', wc_clean( $_POST['have_18_years'] ) );
+                $order->save();
+            }
+        }
     }
 
 		//Validation

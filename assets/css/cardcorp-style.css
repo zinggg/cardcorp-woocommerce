@@ -1,521 +1,652 @@
-@import url(https://fonts.googleapis.com/css?family=Roboto);
+/* ==========================================================================
+   CardCorp Checkout Theme
+   ========================================================================== */
 
-.wpwl-form {
-  max-width: 480px !important;
-  margin: 0 auto 2px !important;
-  padding: 15px !important;
-  color: #777 !important;
-  border-radius: 4px !important;
-}
-.wpwl-form-card .wpwl-group,
-.wpwl-form-directDebit .wpwl-group {
-  padding: 10px;
-  margin: 0;
-}
-.wpwl-form-card .wpwl-group-cvv,
-.wpwl-form-card .wpwl-group-expiry,
-.wpwl-form-directDebit .wpwl-group-cvv,
-.wpwl-form-directDebit .wpwl-group-expiry {
-  width: 50%;
-  float: left;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+/* --------------------------------------------------------------------------
+   Typography & Global Tokens
+   -------------------------------------------------------------------------- */
+
+:root {
+  --cardcorp-font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  /* Core brand */
+  --cardcorp-color-white: #ffffff;
+  --cardcorp-color-black: #0b0b10;
+  --cardcorp-primary: #5f40d3;
+  --cardcorp-secondary: #2d3458;
+
+  /* Backgrounds */
+  --cardcorp-background-light: #f7f8fd;
+  --cardcorp-background-dark: #201e1d;
+
+  /* Violet scale */
+  --cardcorp-violet-90: #16074b;
+  --cardcorp-violet-80: #24106d;
+  --cardcorp-violet-70: #351d8f;
+  --cardcorp-violet-60: #492db1;
+  --cardcorp-violet-50: #6d57f5;
+  --cardcorp-violet-40: #897fff;
+  --cardcorp-violet-30: #a6a4ff;
+  --cardcorp-violet-20: #c9cbff;
+  --cardcorp-violet-10: #eef0ff;
+  --cardcorp-violet-05: #fafbff;
+
+  /* Gray scale */
+  --cardcorp-gray-90: #3d3d3d;
+  --cardcorp-gray-80: #525252;
+  --cardcorp-gray-70: #666666;
+  --cardcorp-gray-60: #7a7a7a;
+  --cardcorp-gray-50: #8f8f8f;
+  --cardcorp-gray-40: #a3a3a3;
+  --cardcorp-gray-30: #b8b8b8;
+  --cardcorp-gray-20: #cccccc;
+  --cardcorp-gray-10: #e0e0e0;
+  --cardcorp-gray-05: #f5f5f5;
+
+  /* Gradients */
+  --cardcorp-gradient-violet-right: linear-gradient(
+    90deg,
+    #f7f8fd 0%,
+    #d8deff 100%
+  );
+  --cardcorp-gradient-violet-left: linear-gradient(
+    270deg,
+    #eef0ff 0%,
+    #ffffff 100%
+  );
+  --cardcorp-gradient-violet-down: linear-gradient(
+    180deg,
+    #f7f8fd 0%,
+    #d8deff 100%
+  );
+  --cardcorp-gradient-violet-up: linear-gradient(
+    0deg,
+    #e1e8ff 0%,
+    #d8deff 100%
+  );
+
+  /* Buttons & states */
+  --cardcorp-button-hover: #4d578c;
+  --cardcorp-button-disabled-fill: #d1d5e8;
+  --cardcorp-button-disabled-text: #c8cde3;
+  --cardcorp-button-shadow-anim: #4629ff;
+  --cardcorp-button-stroke-animated: #897fff;
+
+  /* Inputs & alerts */
+  --cardcorp-input-error-stroke: #eeafaa;
+  --cardcorp-success: #32af40;
+  --cardcorp-warning: #ffac0c;
+  --cardcorp-danger: #d54238;
+  --cardcorp-info: #6ab9ff;
+
+  /* Radii & spacing */
+  --cardcorp-radius-xs: 6px;
+  --cardcorp-radius-sm: 8px;
+  --cardcorp-radius-md: 12px;
+  --cardcorp-radius-lg: 18px;
+  --cardcorp-spacing-xs: 6px;
+  --cardcorp-spacing-sm: 12px;
+  --cardcorp-spacing-md: 16px;
+  --cardcorp-spacing-lg: 24px;
+  --cardcorp-spacing-xl: 32px;
 }
 
-.wpwl-wrapper-cardHolder {
+/* --------------------------------------------------------------------------
+   Checkout Container
+   -------------------------------------------------------------------------- */
+
+#cardcorp_payment_container {
+  font-family: var(--cardcorp-font-family);
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 32px auto auto auto;
+}
+
+/* --------------------------------------------------------------------------
+   Stored Card List & Registration Widgets
+   -------------------------------------------------------------------------- */
+
+#cardcorp_payment_container #wpwl-registrations {
+  position: relative;
+  margin-bottom: 34px;
+}
+
+#cardcorp_payment_container #wpwl-registrations::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  max-width: 640px;
+  height: 1px;
+  background-color: var(--cardcorp-gray-10);
+}
+
+#cardcorp_payment_container * {
+  font-size: 1rem;
+}
+
+#cardcorp_payment_container .wpwl-registration {
   display: flex;
-  flex-wrap: wrap;
-}
-input.wpwl-control-givenName,
-.wpwl-hint-givenNameError {
-  margin-right: 10px;
-}
-input.wpwl-control-surName,
-.wpwl-hint-surNameError {
-  margin-left: 10px;
-}
-input.wpwl-control-givenName,
-.wpwl-hint-givenNameError,
-input.wpwl-control-surName,
-.wpwl-hint-surNameError {
-  width: calc(50% - 10px) !important;
+  align-items: center;
+  gap: 30px;
+  margin: 0px;
 }
 
-.wpwl-container {
-  max-width: 600px;
-  margin: 0 auto;
+#cardcorp_payment_container .wpwl-registration > * {
+  padding: 0px;
+  margin: 0px;
 }
 
-.wpwl-container-virtualAccount-APPLEPAY {
-  padding-top: 0px !important;
-  margin-top: 0px !important;
+@media (max-width: 540px) {
+  #cardcorp_payment_container .wpwl-registration {
+    gap: 12px;
+  }
+
+  #cardcorp_payment_container .wpwl-group-registration {
+    padding: calc(var(--cardcorp-spacing-md) / 2) !important;
+  }
+
+  #cardcorp_payment_container
+    .wpwl-wrapper-registration.wpwl-wrapper-registration-details {
+    gap: 12px;
+  }
+
+  .wpwl-button.wpwl-button-pay {
+    width: 100%;
+  }
+
+  #cardcorp_payment_container
+    .wpwl-wrapper.wpwl-wrapper-registration.wpwl-wrapper-registration-cvv {
+    width: auto !important;
+  }
+
+  #cardcorp_payment_container .wpwl-label-brand,
+  #cardcorp_payment_container .wpwl-wrapper-brand,
+  #cardcorp_payment_container .wpwl-wrapper-registration-registrationId,
+  #cardcorp_payment_container .wpwl-wrapper-registration-brand,
+  #cardcorp_payment_container .wpwl-wrapper-registration-number,
+  #cardcorp_payment_container .wpwl-wrapper-registration-expiry {
+    font-size: 0.875rem !important;
+  }
 }
 
-.wpwl-form-virtualAccount-APPLEPAY .wpwl-group-button {
-  text-align: right;
-  padding-top: 0px !important;
-  margin-top: 0px !important;
+#cardcorp_payment_container
+  .wpwl-wrapper-registration.wpwl-wrapper-registration-holder {
+  display: none;
 }
 
-.wpwl-control {
-  height: 44px !important;
-  font-family: Roboto, sans-serif !important;
-  font-size: 16px;
-  color: #777 !important;
-  background-color: #fff !important;
-  border: 1px solid #ddd !important;
-  border-radius: 1px !important;
+#cardcorp_payment_container .wpwl-wrapper-registration-brand {
+  width: auto;
+  height: auto;
+}
+
+#cardcorp_payment_container .wpwl-wrapper-registration-brand .wpwl-brand {
+  margin: 0;
+  display: inline-block;
+  min-height: 28px;
+  min-width: 56px;
+}
+
+#cardcorp_payment_container .wpwl-wrapper.wpwl-wrapper-submit {
+  display: grid;
+  gap: 16px;
+}
+
+#cardcorp_payment_container .wpwl-wrapper.wpwl-wrapper-submit::before {
+  position: absolute;
+}
+
+#cardcorp_payment_container .wpwl-wrapper.wpwl-wrapper-submit .customLabel {
+  display: flex;
+  align-items: center;
+}
+
+#cardcorp_payment_container .wpwl-wrapper.wpwl-wrapper-submit .customInput {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#cardcorp_payment_container .wpwl-wrapper.wpwl-wrapper-submit .wpwl-button-pay {
+  margin: 16px auto auto 0px !important;
+}
+
+#cardcorp_payment_container .wpwl-wrapper-registration-registrationId {
+  width: max-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#cardcorp_payment_container
+  .wpwl-wrapper-registration.wpwl-wrapper-registration-details {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   CVV Input & Helper Elements
+   -------------------------------------------------------------------------- */
+
+#cardcorp_payment_container .wpwl-hint.wpwl-hint-cvvError {
+  font-size: 14px;
+  color: var(--cardcorp-danger);
+}
+
+#cardcorp_payment_container .wpwl-wrapper-registration-brand {
+  display: flex;
+  align-items: center;
+}
+
+#cardcorp_payment_container
+  .wpwl-wrapper.wpwl-wrapper-registration.wpwl-wrapper-registration-cvv {
+  width: 160px;
+}
+
+#cardcorp_payment_container
+  .wpwl-wrapper.wpwl-wrapper-registration.wpwl-wrapper-registration-cvv
+  .wpwl-hint.wpwl-hint-cvvError {
+  font-size: 12px;
+  color: var(--cardcorp-danger);
+}
+
+#cardcorp_payment_container
+  .wpwl-registration
+  .wpwl-control.wpwl-control-iframe.wpwl-control-cvv {
+  border-radius: 8px;
+  border: 1px solid var(--cardcorp-gray-10);
+  background: var(--cardcorp-color-white);
+  position: relative;
+  width: 160px;
+  height: 34px !important;
   padding: 4px !important;
-  width: 100% !important;
-  box-shadow: none !important;
 }
-.wpwl-control-cardHolder::placeholder,
-.wpwl-control-expiry::placeholder {
-  color: #777;
-  font-family: Roboto, sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  font-style: normal;
+
+#cardcorp_payment_container .wpwl-icon.ui-state-default.ui-corner-all {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  background: none;
+  border: none;
+  display: none;
 }
-.wpwl-group.wpwl-group-cardHolder {
-  clear: left;
+
+#cardcorp_payment_container .wpwl-label-brand,
+#cardcorp_payment_container .wpwl-wrapper-brand,
+#cardcorp_payment_container .wpwl-wrapper-registration-registrationId,
+#cardcorp_payment_container .wpwl-wrapper-registration-brand,
+#cardcorp_payment_container .wpwl-wrapper-registration-number,
+#cardcorp_payment_container .wpwl-wrapper-registration-expiry {
+  padding: 0px;
+  font-size: 1rem;
+  color: var(--cardcorp-color-black);
 }
+
 .wpwl-group.wpwl-group-brand {
   position: relative;
+  height: 36px;
 }
-.wpwl-group-button {
-  padding: 20px 10px !important;
+
+.wpwl-group.wpwl-group-brand > * {
+  position: absolute;
 }
-.wpwl-group.wpwl-group-submit.wpwl-clearfix {
-  clear: both;
-}
-.wpwl-button {
-  margin-top: 10px !important;
-  padding: 0 15px;
-}
-.btn_cancel {
-  float: left;
-  color: #fff;
-  background-color: #aaa;
-  border-color: #999;
-  border-radius: 4px;
-}
-.btn_cancel:hover {
-  color: #fff;
-  background-color: #999;
-}
-.testmode {
-  margin: 0 auto 1px auto !important;
-  padding: 3px 0 3px 0;
-  width: 100%;
-  font-size: 13px !important;
-  font-weight: 700;
-  color: red !important;
-  background-color: #fba;
-  text-align: center;
-  border-bottom: red solid 3px;
-  max-width: 480px;
-}
-.wpwl-brand,
-.wpwl-label-brand,
-.wpwl-wrapper-brand {
+
+#cardcorp_payment_container
+  .wpwl-wrapper-brand
+  .wpwl-control.wpwl-control-brand {
   display: none;
 }
 
-.wpwl-brand,
-.wpwl-label-brand,
-.wpwl-wrapper-brand {
-  display: none;
+#cardcorp_payment_container .wpwl-wrapper-registration-expiry {
+  color: var(--cardcorp-gray-40);
 }
 
-.wpwl-control-cvv {
-  border-radius: 6px !important;
+#cardcorp_payment_container .wpwl-wrapper-registration-registrationId input {
+  margin: auto;
 }
 
-#wpwl-registrations .wpwl-brand,
-#wpwl-registrations .wpwl-label-brand,
-#wpwl-registrations .wpwl-wrapper-brand {
+#cardcorp_payment_container
+  .wpwl-wrapper-registration-registrationId
+  input:focus,
+#cardcorp_payment_container
+  .wpwl-wrapper-registration-registrationId
+  input:focus {
+  border: none;
+  outline: none;
+}
+
+#cardcorp_payment_container
+  > .wpwl-form.wpwl-form-registrations
+  .wpwl-wrapper-submit {
+  margin-top: 0px;
+}
+
+/* Checkout Form Fields */
+
+#cardcorp_payment_container .wpwl-control.wpwl-control-iframe,
+#cardcorp_payment_container .wpwl-control.wpwl-control-cardNumber,
+#cardcorp_payment_container .wpwl-control.wpwl-control-cardHolder,
+#cardcorp_payment_container .wpwl-control.wpwl-control-expiry,
+#cardcorp_payment_container .wpwl-control.wpwl-control-cvv,
+#cardcorp_payment_container .wpwl-control.wpwl-control-brand,
+#cardcorp_payment_container .wpwl-control.wpwl-control-mobilePhoneCountryCode,
+#cardcorp_payment_container .wpwl-control.wpwl-control-mobilePhoneNumber,
+#cardcorp_payment_container .wpwl-control.wpwl-control-birthDate {
+  display: flex;
+  height: 56px !important;
+  width: 100% !important;
+  padding: 16px !important;
+  align-items: flex-start;
+  gap: 10px;
+  align-self: stretch;
+  border-radius: 8px;
+  border: 1px solid var(--cardcorp-gray-10);
+  background: var(--cardcorp-color-white);
+}
+
+#cardcorp_payment_container .wpwl-control.wpwl-control-cardHolder:focus,
+#cardcorp_payment_container .wpwl-control.wpwl-control-cardHolder:focus-visible,
+#cardcorp_payment_container .wpwl-control.wpwl-control-expiry:focus,
+#cardcorp_payment_container .wpwl-control.wpwl-control-expiry:focus-visible {
+  border-color: rgb(54, 149, 226);
+  outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   Inline System Messages
+   -------------------------------------------------------------------------- */
+
+.cardcorp-messages {
+  margin-top: var(--cardcorp-spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cardcorp-spacing-xs);
+}
+
+.cardcorp-message {
   display: block;
-}
-
-#wpwl-registrations .wpwl-wrapper-registration-details {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-#wpwl-registrations .wpwl-brand-VISA {
-  margin-top: 4px;
-}
-
-#wpwl-registrations .wpwl-registration {
-  display: flex;
-}
-
-.wpwl-wrapper-submit {
-  display: flex;
-  flex-flow: wrap;
-}
-.wpwl-wrapper-submit div,
-.wpwl-wrapper-submit a {
-  flex: 0 0 50%;
-}
-#wpwl-registrations .wpwl-wrapper-registration-cvv {
-  width: 19%;
-}
-#wpwl-registrations .wpwl-group-registration {
-  border: 2px solid #cccccc;
-  border-radius: 10px;
-}
-#wpwl-registrations .wpwl-selected {
-  border-color: #28a745 !important;
-}
-#wpwl-registrations .wpwl-wrapper-registration {
-  color: #383838;
-}
-#wpwl-registrations .wpwl-wrapper-registration span {
-  font-size: small;
-  color: #666666;
-}
-
-.wpwl-popover-content {
-  display: none;
-}
-
-@media (max-width: 480px) {
-  #wpwl-registrations .wpwl-registration {
-    flex-wrap: wrap;
-  }
-  #wpwl-registrations .wpwl-wrapper-registration-cvv {
-    width: 100%;
-  }
-  #wpwl-registrations iframe.wpwl-control-cvv {
-    width: 50% !important;
-    margin-left: auto;
-  }
-}
-
-.wpwl-wrapper-submit button {
-  flex: 0 0 30%;
-  margin-left: auto;
-}
-
-.wpwl-brand-card {
-  float: right;
-  width: 38px;
-  height: 25px;
-  margin-left: 1px;
-  background-size: 38px 25px !important;
-}
-.wpwl-brand-GENERIC {
-  background: url(../images/general/generic.svg) no-repeat top left;
-}
-.wpwl-brand-VISA {
-  background: url(../images/general/visa.svg) no-repeat top left;
-}
-.wpwl-brand-MASTER {
-  background: url(../images/general/master.svg) no-repeat top left;
-}
-.wpwl-brand-MAESTRO {
-  background: url(../images/general/maestro.svg) no-repeat top left;
-}
-.wpwl-brand-AMEX {
-  background: url(../images/general/amex.svg) no-repeat top left;
-}
-.wpwl-brand-DINERS {
-  background: url(../images/general/diners.svg) no-repeat top left;
-}
-.wpwl-brand-JCB {
-  background: url(../images/general/jcb.svg) no-repeat top left;
-}
-.wpwl-wrapper {
   width: 100%;
-}
-div#d1,
-div#d2,
-div#d3 {
-  width: 50%;
-}
-div#d1 img,
-div#d2 img,
-div#d3 img {
-  display: block;
-  height: 40px;
-}
-div#banner {
-  display: flex;
-  margin-top: 20px;
-}
-div#d1 img,
-div#d2 img,
-div#d3 img {
-  margin-left: auto;
-  margin-right: auto;
-  border: 1px solid #ddd;
-  padding: 5px;
-  border-radius: 5px;
-  width: 100%;
-}
-div#d1,
-div#d2 {
-  padding-right: 2%;
-}
-div#d3 {
-  padding-right: 0;
-}
-#cardcorp_payment_mode.test {
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  background: red;
-  padding: 0 10px 10px;
-}
-#cardcorp_payment_mode.live {
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  background: #fff;
-}
-#cardcorp_payment_container {
-  background: #fff;
-}
-span.testmode {
-  font-size: small;
-  color: #fff;
-  text-align: center;
-}
-div#cardcorp_merchant_info {
-  max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 0 10px;
-  font-family: Roboto, sans-serif;
-  font-size: 13px;
-}
-div#cardcorp_banner {
-  max-width: 1074px;
-  display: flex;
-  margin: 10px auto;
-  padding-bottom: 20px;
-}
-#cardcorp_banner .cardcorp {
-  width: 20%;
-  border-right: solid #ccc 2px;
-}
-#cardcorp_banner .cardcorp_threeds {
-  width: 25%;
-  display: flex;
-  border-right: solid #ccc 2px;
-}
-#cardcorp_banner .cardcorp_cards {
-  width: 35%;
-  display: flex;
-  border-right: solid #ccc 2px;
-}
-#cardcorp_banner .cardcorp_bank {
-  width: 20%;
-}
-.cardcorp img {
-  height: 30px !important;
-  display: block;
-  margin: auto;
-}
-.cardcorp_threeds img {
-  width: 40%;
-  height: 25px !important;
-  display: block;
-  margin: auto;
-  margin-top: 3px;
-}
-.cardcorp_cards img {
-  height: 30px !important;
-  display: block;
-  margin: auto;
-}
-.cardcorp_bank img {
-  height: 30px !important;
-  display: block;
-  margin: auto;
-  max-width: 80%;
-}
-
-textarea.logs_textarea {
-  background: rgb(35 40 45);
-  color: #fff;
-  text-shadow: 1px 0px #9bcbf7;
-}
-
-.cardcorp-success-text {
-  color: #46b450;
-}
-
-.cardcorp-error-text {
-  color: #dc3232;
-}
-
-.cardcorp-warning-text {
-  color: #ffc107;
-}
-
-table.requires-table {
-  min-width: 400px;
-}
-
-table.requires-table td {
+  padding: var(--cardcorp-spacing-sm) var(--cardcorp-spacing-md);
+  border-radius: var(--cardcorp-radius-sm);
+  border: 1px solid transparent;
+  background: var(--cardcorp-background-light);
   font-weight: 600;
+  text-align: center;
 }
 
-@media (max-width: 480px) {
-  div#cardcorp_banner {
-    flex-flow: row wrap;
-    display: flex;
-  }
-  #cardcorp_banner .cardcorp {
-    order: 2;
-    width: 35%;
-    padding-left: 10px;
-    border: none;
-  }
-  #cardcorp_banner .cardcorp_threeds {
-    order: 3;
-    width: 30%;
-    padding-left: 5px;
-    padding-right: 5px;
-    display: inline-flex;
-    border: none;
-  }
-  #cardcorp_banner .cardcorp_cards {
-    order: 1;
-    width: 100%;
-    border: none;
-    padding: 0 5px 10px 5px;
-  }
-  #cardcorp_banner .cardcorp_bank {
-    order: 4;
-    width: 35%;
-    display: block;
-  }
-  .cardcorp img {
-    width: unset;
-    height: 20px !important;
-    display: block;
-  }
-  .cardcorp_cards img {
-    height: 25px !important;
-  }
-  .cardcorp_threeds img {
-    width: 40%;
-    height: 20px !important;
-  }
-  .cardcorp_bank img {
-    width: unset;
-    height: 20px !important;
-    display: block;
-  }
-  .wpwl-control {
-    height: 50px !important;
-    border-radius: 5px !important;
-  }
-  .wpwl-group-brand {
-    padding: 1px 1px 5px 1px !important;
-  }
-  .wpwl-button-pay {
-    width: 150px;
-    height: 50px;
-    padding: 0.8em 1.8em !important;
-    margin: 0 auto;
-  }
-  .wpwl-brand-card {
-    float: right;
-    width: 53px;
-    height: 30px;
-    margin-left: 1px;
-  }
-  .wpwl-brand-custom {
-    background-size: 53px 30px;
-  }
-  .wpwl-label-brand,
-  .wpwl-wrapper-brand {
-    display: none;
-  }
-  .wpwl-button-cancel {
-    display: none;
-    padding: 0.8em 1.8em !important;
-  }
+/* Message Variants */
 
-  .wpwl-form-virtualAccount-APPLEPAY {
-    margin-top: 0px !important;
-    padding-top: 0px !important;
-  }
-  .wpwl-form-virtualAccount-APPLEPAY > .wpwl-group-button,
-  #wpwl-form-virtualAccount-APPLEPAY > form > div {
-    margin-top: 0px !important;
-    padding-top: 0px !important;
-    text-align: center !important;
-  }
-
-  .wpwl-apple-pay-button {
-    margin: 0 auto;
-    width: 150px;
-  }
+.cardcorp-message--info {
+  background: rgba(106, 185, 255, 0.1);
+  border-color: rgba(106, 185, 255, 0.3);
 }
 
-@media screen and (max-width: 480px) {
-  .cardcorp-basket {
-    padding-top: 2rem;
-    border-top: 1px solid black !important;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid black !important;
-    display: flex !important;
-    line-height: 2.8rem;
-  }
-  .cardcorp-basket .on {
-    display: block !important;
-    padding: 0;
-  }
-  .cardcorp-basket .product-thumbnail img {
-    margin: 0;
-  }
+.cardcorp-message--success {
+  background: rgba(50, 175, 64, 0.08);
+  border-color: rgba(50, 175, 64, 0.3);
 }
 
-.wpwl-form.wpwl-form-virtualAccount-APPLEPAY {
-  padding: 0 15px !important;
-  margin: 0 auto !important;
-}
-.wpwl-group-submit {
-  padding-bottom: 0 !important;
+.cardcorp-message--warning {
+  background: rgba(255, 172, 12, 0.1);
+  border-color: rgba(255, 172, 12, 0.3);
 }
 
-.wpwl-button-pay,
-.wpwl-apple-pay-button {
-  flex: none !important;
-  width: 100%;
-  padding: 0.5rem 1rem !important;
-  margin: 0 auto !important;
-  height: 48px;
-}
-.wpwl-button-pay {
-  margin-top: 1rem !important;
+.cardcorp-message--error {
+  background: rgba(213, 66, 56, 0.08);
+  border-color: rgba(213, 66, 56, 0.3);
 }
 
-.wpwl-wrapper > .wpwl-icon {
-  right: 7px !important;
-  top: 7px !important;
+/* Shared Text Helpers */
+
+.testmode {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: var(--cardcorp-spacing-sm);
+  margin: auto auto auto 0px;
+  padding: var(--cardcorp-spacing-sm) var(--cardcorp-spacing-md);
+  max-width: max-content;
+  border-radius: var(--cardcorp-radius-sm);
+  border: 1px solid rgba(106, 185, 255, 0.3);
+  background: rgba(106, 185, 255, 0.08);
+  color: var(--cardcorp-info);
+  font-family: var(--cardcorp-font-family);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
 }
 
-.wpwl-form {
-  position: relative;
+.testmode__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--cardcorp-info);
+  color: var(--cardcorp-color-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-.wpwl-group-brand {
-  padding: 0 10px !important;
-  position: absolute !important;
+
+.cardcorp-alt-card-title {
+  max-width: 40em;
+  margin: var(--cardcorp-spacing-sm) 0px;
+  font-family: var(--cardcorp-font-family);
+  font-size: 1.5rem !important;
+  font-weight: 600;
+  color: var(--cardcorp-color-black);
+  text-align: left;
+}
+
+.cardcorp-message,
+.cardcorp-success-text,
+.cardcorp-warning-text,
+.cardcorp-error-text,
+.cardcorp-info-text {
+  font-family: var(--cardcorp-font-family);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.cardcorp-success-text,
+.cardcorp-message--success {
+  color: var(--cardcorp-success);
+}
+
+.cardcorp-warning-text,
+.cardcorp-message--warning {
+  color: var(--cardcorp-warning);
+}
+
+.cardcorp-error-text,
+.cardcorp-message--error {
+  color: var(--cardcorp-danger);
+}
+
+.cardcorp-info-text,
+.cardcorp-message--info {
+  color: var(--cardcorp-info);
+}
+
+#cardcorp_payment_container .wpwl-group-registration {
+  border: 1px solid var(--cardcorp-gray-10);
+  padding: var(--cardcorp-spacing-md);
+  border-radius: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Button System (Primary, Secondary & Wallet)
+   -------------------------------------------------------------------------- */
+
+.wpwl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: auto;
-  right: 25px;
-  top: 12px;
-  z-index: 2;
-}
-.wpwl-brand-MAESTRO {
-  display: none !important;
+  min-height: 48px;
+  padding: 0 var(--cardcorp-spacing-md);
+  border-radius: var(--cardcorp-radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--cardcorp-secondary);
+  font-family: var(--cardcorp-font-family);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 
-.wpwl-control,
-.wpwl-control-cvv {
-  border-radius: 1px !important;
+/* Primary Checkout Button */
+
+.wpwl-button-pay {
+  display: flex;
+  width: 240px;
+  max-width: 100%;
+  height: 56px;
+  padding: 16px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: var(--cardcorp-radius-sm);
+  background: var(--cardcorp-secondary);
+  color: #fff !important;
+  margin: 0 auto !important;
+  transition: 0.25s;
+}
+
+.wpwl-button-pay:hover {
+  background: var(--cardcorp-button-hover);
+  color: #fff !important;
+}
+
+.wpwl-button-pay:focus,
+.wpwl-button-pay:focus-visible,
+.wpwl-button-pay:active {
+  background: var(--cardcorp-secondary);
+  box-shadow: inset 0 0 0 2px var(--cardcorp-violet-30);
+  outline: none;
+}
+
+.wpwl-button-pay:disabled {
+  background: var(--cardcorp-button-disabled-fill);
+  color: var(--cardcorp-color-white) !important;
+  outline: none;
+}
+
+.wpwl-button-pay:disabled:hover {
+  background: var(--cardcorp-button-disabled-fill);
+}
+
+/* Digital Wallet Buttons */
+
+.wpwl-apple-pay-button {
+  display: flex;
+  width: 100%;
+  max-width: 320px;
+  min-height: 56px;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--cardcorp-radius-sm);
+  background: var(--cardcorp-secondary);
+  color: #fff !important;
+  font-family: var(--cardcorp-font-family);
+  font-weight: 600;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.wpwl-apple-pay-button:hover {
+  background: var(--cardcorp-button-hover);
+}
+
+.wpwl-apple-pay-button:focus,
+.wpwl-apple-pay-button:focus-visible,
+.wpwl-apple-pay-button:active {
+  background: var(--cardcorp-secondary);
+  outline: 2px solid var(--cardcorp-violet-30);
+  outline-offset: 0;
+}
+
+.wpwl-apple-pay-button:disabled {
+  background: var(--cardcorp-button-disabled-fill);
+  color: var(--cardcorp-color-white) !important;
+  outline: none;
+}
+
+/* Secondary / Cancel Buttons */
+
+.wpwl-button-cancel,
+.btn_cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--cardcorp-spacing-md);
+  border-radius: var(--cardcorp-radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--cardcorp-gray-60) !important;
+  font-family: var(--cardcorp-font-family);
+  font-weight: 600;
+  transition: color 160ms ease;
+}
+
+.wpwl-button-cancel:hover,
+.btn_cancel:hover {
+  color: var(--cardcorp-secondary) !important;
+}
+
+/* Card Form Layout */
+
+#cardcorp_payment_container
+  .wpwl-container.wpwl-container-card
+  .wpwl-form.wpwl-form-card.wpwl-clearfix {
+  display: grid;
+  row-gap: 16px;
+  width: 100%;
+  max-width: 40em;
+}
+
+#cardcorp_payment_container
+  .wpwl-container.wpwl-container-card
+  .wpwl-form.wpwl-form-card.wpwl-clearfix
+  .wpwl-wrapper {
+  width: 100%;
+}
+
+#cardcorp_payment_container
+  .wpwl-container.wpwl-container-card
+  .wpwl-form.wpwl-form-card.wpwl-clearfix
+  > * {
+  margin: 0;
+}
+
+#cardcorp_payment_container .wpwl-form {
+  margin: auto auto auto 0;
+}
+
+#cardcorp_payment_container .wpwl-group.wpwl-group-cardHolder.wpwl-clearfix {
+  border: none;
+}
+
+.wpwl-wrapper.wpwl-wrapper-brand .wpwl-control.wpwl-control-brand {
+  display: none;
+}
+
+/* Validation Styles */
+
+#cardcorp_payment_container .wpwl-has-error ~ .wpwl-hint {
+  color: var(--cardcorp-danger);
+  font-size: 14px;
+}
+
+#cardcorp_payment_container .wpwl-has-error {
+  color: var(--cardcorp-danger);
 }

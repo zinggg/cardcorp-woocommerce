@@ -138,14 +138,14 @@ function init_woocommerce_cardcorp()
 		{
 			if ($this->enabled == "yes") {
 				if (get_option('woocommerce_force_ssl_checkout') == "no") { ?>
-					<div class="error">
-						<p>
-							<?= sprintf(__("<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL certificate on your checkout page. Please ensure that you have a valid SSL certificate and that you are <a href=\"%s\">forcing the checkout pages to be secured.</a>"), $this->method_title, admin_url('admin.php?page=wc-settings&tab=advanced')); ?>
+<div class="error">
+    <p>
+        <?= sprintf(__("<strong>%s</strong> is enabled and WooCommerce is not forcing the SSL certificate on your checkout page. Please ensure that you have a valid SSL certificate and that you are <a href=\"%s\">forcing the checkout pages to be secured.</a>"), $this->method_title, admin_url('admin.php?page=wc-settings&tab=advanced')); ?>
 
-						</p>
-					</div>
-				<?php } ?>
-			<?php }
+    </p>
+</div>
+<?php } ?>
+<?php }
 		}
 
 
@@ -160,18 +160,21 @@ function init_woocommerce_cardcorp()
 			$default_tab = null;
 			$tab = isset($_GET['cardcorp_tab']) ? $_GET['cardcorp_tab'] : $default_tab; ?>
 
-			<nav class="nav-tab-wrapper">
+<nav class="nav-tab-wrapper">
 
-				<a href="?page=wc-settings&tab=checkout&section=cardcorp" class="nav-tab <?php if ($tab === null) { ?> nav-tab-active <?php } ?>">General Settings</a>
+    <a href="?page=wc-settings&tab=checkout&section=cardcorp"
+        class="nav-tab <?php if ($tab === null) { ?> nav-tab-active <?php } ?>">General Settings</a>
 
-				<a href="?page=wc-settings&tab=checkout&section=cardcorp&cardcorp_tab=requires" class="nav-tab <?php if ($tab === "requires") { ?> nav-tab-active <?php } ?>">Requires</a>
+    <a href="?page=wc-settings&tab=checkout&section=cardcorp&cardcorp_tab=requires"
+        class="nav-tab <?php if ($tab === "requires") { ?> nav-tab-active <?php } ?>">Requires</a>
 
-				<a href="?page=wc-settings&tab=checkout&section=cardcorp&cardcorp_tab=logs" class="nav-tab <?php if ($tab === "logs") { ?> nav-tab-active <?php } ?>">Logs</a>
+    <a href="?page=wc-settings&tab=checkout&section=cardcorp&cardcorp_tab=logs"
+        class="nav-tab <?php if ($tab === "logs") { ?> nav-tab-active <?php } ?>">Logs</a>
 
-			</nav>
+</nav>
 
-			<div class="tab-content">
-				<?php
+<div class="tab-content">
+    <?php
 				switch ($tab):
 					case 'requires':
 						$this->requiresTab();
@@ -184,19 +187,19 @@ function init_woocommerce_cardcorp()
 						break;
 				endswitch;
 				?>
-			</div>
-		<?php
+</div>
+<?php
 		}
 
 		public function generalSettingsTab()
 		{
 		?>
-			<h2>Cardcorp Payment Gateway</h2>
-			<p>Cardcorp Configuration Settings</p>
-			<table class="form-table">
-				<?php $this->generate_settings_html(); ?>
-			</table>
-		<?php wc_enqueue_js("jQuery( function( $ ) {
+<h2>Cardcorp Payment Gateway</h2>
+<p>Cardcorp Configuration Settings</p>
+<table class="form-table">
+    <?php $this->generate_settings_html(); ?>
+</table>
+<?php wc_enqueue_js("jQuery( function( $ ) {
 				var cardcorp_test_fields = '#woocommerce_cardcorp_test_entity_id, #woocommerce_cardcorp_test_access_token'; 
 				var cardcorp_live_fields = '#woocommerce_cardcorp_entity_id, #woocommerce_cardcorp_access_token'; 
 				$( '#woocommerce_cardcorp_operation_mode' ).change(function(){ 
@@ -219,73 +222,74 @@ function init_woocommerce_cardcorp()
 			global $wp_version;
 		?>
 
-			<h3>Requires</h3>
-			<table class="requires-table">
-				<tbody>
-					<tr>
-						<td>PHP</td>
-						<td><strong><?= phpversion(); ?></strong></td>
-						<td>
-							<?php if (phpversion() >= '7.0.0') { ?>
-								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
-							<?php } else if (phpversion() >= '5.2.0') { ?>
-								<span class="dashicons dashicons-info cardcorp-warning-text"></span>
-							<?php } else { ?>
-								<span class="dashicons dashicons-no cardcorp-error-text"></span>
-							<?php } ?>
-						</td>
-					</tr>
-					<tr>
-						<td>WordPress</td>
-						<td><?= $wp_version; ?></td>
-						<td>
-							<?php if ($wp_version >= '5.4.0') { ?>
-								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
-							<?php } else if ($wp_version >= '5.0.0') { ?>
-								<span class="dashicons dashicons-info cardcorp-warning-text"></span>
-							<?php } else { ?>
-								<span class="dashicons dashicons-no cardcorp-error-text"></span>
-							<?php } ?>
-						</td>
-					</tr>
-					<tr>
-						<td>WooCommerce</td>
-						<td><?= WC_VERSION; ?></td>
-						<td>
-							<?php if (WC_VERSION >= '4.2.2') { ?>
-								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
-							<?php } else if (WC_VERSION >= '3.0') { ?>
-								<span class="dashicons dashicons-info cardcorp-warning-text"></span>
-							<?php } else { ?>
-								<span class="dashicons dashicons-no cardcorp-error-text"></span>
-							<?php } ?>
-						</td>
-					</tr>
-					<tr>
-						<td>Force SSL</td>
-						<td><?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?> No <?php } else { ?> Yes <?php } ?></td>
-						<td>
-							<?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?>
-								<span class="dashicons dashicons-no cardcorp-error-text"></span>
-							<?php } else { ?>
-								<span class="dashicons dashicons-yes cardcorp-success-text"></span>
-							<?php } ?>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+<h3>Requires</h3>
+<table class="requires-table">
+    <tbody>
+        <tr>
+            <td>PHP</td>
+            <td><strong><?= phpversion(); ?></strong></td>
+            <td>
+                <?php if (phpversion() >= '7.0.0') { ?>
+                <span class="dashicons dashicons-yes cardcorp-success-text"></span>
+                <?php } else if (phpversion() >= '5.2.0') { ?>
+                <span class="dashicons dashicons-info cardcorp-warning-text"></span>
+                <?php } else { ?>
+                <span class="dashicons dashicons-no cardcorp-error-text"></span>
+                <?php } ?>
+            </td>
+        </tr>
+        <tr>
+            <td>WordPress</td>
+            <td><?= $wp_version; ?></td>
+            <td>
+                <?php if ($wp_version >= '5.4.0') { ?>
+                <span class="dashicons dashicons-yes cardcorp-success-text"></span>
+                <?php } else if ($wp_version >= '5.0.0') { ?>
+                <span class="dashicons dashicons-info cardcorp-warning-text"></span>
+                <?php } else { ?>
+                <span class="dashicons dashicons-no cardcorp-error-text"></span>
+                <?php } ?>
+            </td>
+        </tr>
+        <tr>
+            <td>WooCommerce</td>
+            <td><?= WC_VERSION; ?></td>
+            <td>
+                <?php if (WC_VERSION >= '4.2.2') { ?>
+                <span class="dashicons dashicons-yes cardcorp-success-text"></span>
+                <?php } else if (WC_VERSION >= '3.0') { ?>
+                <span class="dashicons dashicons-info cardcorp-warning-text"></span>
+                <?php } else { ?>
+                <span class="dashicons dashicons-no cardcorp-error-text"></span>
+                <?php } ?>
+            </td>
+        </tr>
+        <tr>
+            <td>Force SSL</td>
+            <td><?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?> No <?php } else { ?> Yes <?php } ?>
+            </td>
+            <td>
+                <?php if (get_option('woocommerce_force_ssl_checkout') == "no") { ?>
+                <span class="dashicons dashicons-no cardcorp-error-text"></span>
+                <?php } else { ?>
+                <span class="dashicons dashicons-yes cardcorp-success-text"></span>
+                <?php } ?>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-		<?php
+<?php
 		}
 
 		public function logsTab()
 		{
 		?>
-			<h3>Logs</h3>
+<h3>Logs</h3>
 
-			<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_cardcorp_logs(); ?></textarea>
+<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_cardcorp_logs(); ?></textarea>
 
-			<?php
+<?php
 		}
 
 		/**
@@ -532,62 +536,62 @@ function init_woocommerce_cardcorp()
 				$status = json_decode($gtwresponse['body']);
 				if (isset($status->id)) { ?>
 
-					<?php if ($this->basket) {
+<?php if ($this->basket) {
 						echo do_shortcode('[woocommerce_cart]');
 					?>
-						<ul style="display:block" class="order_details">
-							<li class="order">
-								<?php esc_html_e('Order number:', 'woocommerce'); ?>
-								<strong><?php echo esc_html($order->get_order_number()); ?></strong>
-							</li>
-							<li class="date">
-								<?php esc_html_e('Date:', 'woocommerce'); ?>
-								<strong><?php echo esc_html(wc_format_datetime($order->get_date_created())); ?></strong>
-							</li>
-							<li class="total">
-								<?php esc_html_e('Total:', 'woocommerce'); ?>
-								<strong><?php echo wp_kses_post($order->get_formatted_order_total()); ?></strong>
-							</li>
-							<?php if ($order->get_payment_method_title()) : ?>
-								<li class="method">
-									<?php esc_html_e('Payment method:', 'woocommerce'); ?>
-									<strong><?php echo wp_kses_post($order->get_payment_method_title()); ?></strong>
-								</li>
-							<?php endif; ?>
-						</ul>
-						<style>
-							#ajax-loading-screen,
-							.woocommerce-cart-form .actions,
-							.product-remove {
-								display: none !important;
-							}
+<ul style="display:block" class="order_details">
+    <li class="order">
+        <?php esc_html_e('Order number:', 'woocommerce'); ?>
+        <strong><?php echo esc_html($order->get_order_number()); ?></strong>
+    </li>
+    <li class="date">
+        <?php esc_html_e('Date:', 'woocommerce'); ?>
+        <strong><?php echo esc_html(wc_format_datetime($order->get_date_created())); ?></strong>
+    </li>
+    <li class="total">
+        <?php esc_html_e('Total:', 'woocommerce'); ?>
+        <strong><?php echo wp_kses_post($order->get_formatted_order_total()); ?></strong>
+    </li>
+    <?php if ($order->get_payment_method_title()) : ?>
+    <li class="method">
+        <?php esc_html_e('Payment method:', 'woocommerce'); ?>
+        <strong><?php echo wp_kses_post($order->get_payment_method_title()); ?></strong>
+    </li>
+    <?php endif; ?>
+</ul>
+<style>
+#ajax-loading-screen,
+.woocommerce-cart-form .actions,
+.product-remove {
+    display: none !important;
+}
 
-							.woocommerce-cart-form {
-								margin-bottom: 1.5rem;
-							}
+.woocommerce-cart-form {
+    margin-bottom: 1.5rem;
+}
 
-							.order_details {
-								display: none;
-							}
-						</style>
-						<script>
-							$ = jQuery;
-							$.each($(".product-quantity select"), function() {
-								$(this).replaceWith('x ' + $(this).val())
-							});
-						</script>
-					<?php } else { ?>
-						<style>
-							#ajax-loading-screen,
-							.order_details {
-								display: none;
-							}
-						</style>
-					<?php } ?>
+.order_details {
+    display: none;
+}
+</style>
+<script>
+$ = jQuery;
+$.each($(".product-quantity select"), function() {
+    $(this).replaceWith('x ' + $(this).val())
+});
+</script>
+<?php } else { ?>
+<style>
+#ajax-loading-screen,
+.order_details {
+    display: none;
+}
+</style>
+<?php } ?>
 
 
 
-				<?php
+<?php
 
 					if (!function_exists('get_plugin_data')) {
 						require_once(ABSPATH . 'wp-admin/includes/plugin.php');
@@ -605,7 +609,7 @@ function init_woocommerce_cardcorp()
 					echo 'showCVVHint: true,
 						brandDetection: true,
 						showPlaceholders: true,
-						autofocus : "card.number",
+						autofocus : null,
 						showLabels: false,
 						registrations: {
 							requireCvv: true
@@ -624,13 +628,21 @@ function init_woocommerce_cardcorp()
 								validateHolder(e);
 							  });
 
-							$(".wpwl-wrapper-registration-holder").prepend("<span>Card Holder:</span> ");
-							$(".wpwl-wrapper-registration-expiry").prepend("<span>Expiry:</span> ");
-							$(".wpwl-wrapper-registration-number").prepend("<span>Last 4 Digits:</span> ");
 							$(".wpwl-group-cvv").after( $(".wpwl-group-cardHolder").detach()); 
 
-							$("button[data-action=show-initial-forms]").html("Use Another Card"); 
-							
+							var $toggleButton = $("button[data-action=show-initial-forms]");
+							var $cardForm = $(".wpwl-form-card");
+							if ($toggleButton.length) {
+								$toggleButton.trigger("click");
+								$toggleButton.hide();
+							}
+							if ($cardForm.length && !$cardForm.prev(".cardcorp-alt-card-title").length) {
+								$cardForm.before("<p class=\"cardcorp-alt-card-title\">Use a different card</p>");
+							}
+							if (!$(".cardcorp-alt-card-title--registrations").length) {
+								$(".wpwl-container-registration").prepend("<p class=\"cardcorp-alt-card-title cardcorp-alt-card-title--registrations\">Saved cards</p>");
+							}
+
 						    $(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
 							var visa = $(".wpwl-brand:first").clone().removeAttr("class").attr("class", "wpwl-brand-card wpwl-brand-custom wpwl-brand-VISA");
 							var master = $(visa).clone().removeClass("wpwl-brand-VISA").addClass("wpwl-brand-MASTER");
@@ -638,7 +650,7 @@ function init_woocommerce_cardcorp()
 							var amex = $(visa).clone().removeClass("wpwl-brand-VISA").addClass("wpwl-brand-AMEX");
 							var diners = $(visa).clone().removeClass("wpwl-brand-VISA").addClass("wpwl-brand-DINERS");
 							var jcb = $(visa).clone().removeClass("wpwl-brand-VISA").addClass("wpwl-brand-JCB");
-							var createRegistrationHtml = "<div class=\"customLabel\">Store payment details?</div><div class=\"customInput\"><input type=\"checkbox\" name=\"createRegistration\" value=\"true\" /></div>";
+							var createRegistrationHtml = "<div class=\"customLabel\"><div class=\"customInput\"><input type=\"checkbox\" name=\"createRegistration\" value=\"true\" /></div> Store payment details?</div>";
 							$("form.wpwl-form-card").find(".wpwl-button").before(createRegistrationHtml);
 							$(".wpwl-brand:first")';
 					if (strpos($this->cards, 'VISA') !== false && $i == 0) {
@@ -680,15 +692,21 @@ function init_woocommerce_cardcorp()
 						return true;
 					  }
 					</script>';
-					if ($this->operation == 'test') echo '<div class="testmode">' . 'This is the TEST MODE. No money will be charged' . '</div>';
+					if ($this->operation == 'test') {
+						echo '<div class="testmode">';
+						echo '<span class="testmode__badge">Test Mode</span>';
+						echo '<span class="testmode__copy">This is the TEST MODE. No money will be charged.</span>';
+						echo '</div>';
+					}
 					echo '<div id="cardcorp_payment_container">';
 					echo '<form action="' . $this->return_url . '" class="paymentWidgets" data-brands="' . $this->cards . '"></form>';
-					echo '</div>';
-					echo '<div style="text-align: center; margin-top: 10px; max-width: 200px; margin-left: auto; margin-right: auto;">';
+					echo '<div class="cardcorp-logo-container">';
 					echo '<a href="https://cardcorp.com" target="_blank">';
 					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/cardcorp-dark.svg" width="100px">';
 					echo '</a>';
 					echo '</div>';
+					echo '</div>';
+					
 				} else {
 					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
 						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
@@ -1043,12 +1061,12 @@ function init_woocommerce_cardcorp()
 				$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $gwresponse->result->description;
 				cardcorp_write_log($resp_code_translated); ?>
 
-				<div class="woocommerce">
-					<ul class="woocommerce-error" role="alert">
-						<li><?= sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated); ?> * </li>
-					</ul>
-				</div>
-			<?php }
+<div class="woocommerce">
+    <ul class="woocommerce-error" role="alert">
+        <li><?= sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated); ?> * </li>
+    </ul>
+</div>
+<?php }
 		}
 
 		/**
@@ -1063,35 +1081,35 @@ function init_woocommerce_cardcorp()
 				$astrxId = $_REQUEST['astrxId'];
 				$gwresponse = json_decode($this->report_payment($order_id));
 			?>
-				<div class="woocommerce-order">
-					<h2>Transaction details</h2>
-					<ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details tst">
-						<li class="woocommerce-order-overview__email email">Transaction Codes
+<div class="woocommerce-order">
+    <h2>Transaction details</h2>
+    <ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details tst">
+        <li class="woocommerce-order-overview__email email">Transaction Codes
 
-							<?php if (isset($gwresponse->resultDetails->ConnectorTxID1)) { ?>
-								<strong><?= $gwresponse->resultDetails->ConnectorTxID1; ?></strong>
-							<?php } ?>
+            <?php if (isset($gwresponse->resultDetails->ConnectorTxID1)) { ?>
+            <strong><?= $gwresponse->resultDetails->ConnectorTxID1; ?></strong>
+            <?php } ?>
 
-							<?php if (isset($gwresponse->resultDetails->ConnectorTxID2)) { ?>
-								<strong><?= $gwresponse->resultDetails->ConnectorTxID2; ?></strong>
-							<?php } ?>
+            <?php if (isset($gwresponse->resultDetails->ConnectorTxID2)) { ?>
+            <strong><?= $gwresponse->resultDetails->ConnectorTxID2; ?></strong>
+            <?php } ?>
 
-							<?php if (isset($gwresponse->resultDetails->ConnectorTxID3)) { ?>
-								<strong><?= $gwresponse->resultDetails->ConnectorTxID3; ?></strong>
-							<?php } ?>
+            <?php if (isset($gwresponse->resultDetails->ConnectorTxID3)) { ?>
+            <strong><?= $gwresponse->resultDetails->ConnectorTxID3; ?></strong>
+            <?php } ?>
 
-						</li>
-						<li class="woocommerce-order-overview__email email">Card Type
-							<strong><?= $gwresponse->paymentBrand; ?> *** <?= $gwresponse->card->last4Digits; ?></strong>
-						</li>
-						<li class="woocommerce-order-overview__email email">Payment Type
-							<strong><?= $gwresponse->paymentType; ?></strong>
-						</li>
-						<li class="woocommerce-order-overview__email email">Transaction Time
-							<strong><?= $gwresponse->timestamp; ?></strong>
-						</li>
-					</ul>
-				</div>
+        </li>
+        <li class="woocommerce-order-overview__email email">Card Type
+            <strong><?= $gwresponse->paymentBrand; ?> *** <?= $gwresponse->card->last4Digits; ?></strong>
+        </li>
+        <li class="woocommerce-order-overview__email email">Payment Type
+            <strong><?= $gwresponse->paymentType; ?></strong>
+        </li>
+        <li class="woocommerce-order-overview__email email">Transaction Time
+            <strong><?= $gwresponse->timestamp; ?></strong>
+        </li>
+    </ul>
+</div>
 <?php }
 		}
 

@@ -624,10 +624,6 @@ $.each($(".product-quantity select"), function() {
 							surNameError: "Invalid Lastname",
 						},
 						onReady: function(e) { 
-							$(".wpwl-form-card").find(".wpwl-button-pay").on("click", function(e){
-								validateHolder(e);
-							  });
-
 							$(".wpwl-group-cvv").after( $(".wpwl-group-cardHolder").detach()); 
 
 							var $toggleButton = $("button[data-action=show-initial-forms]");
@@ -673,24 +669,11 @@ $.each($(".product-quantity select"), function() {
 					}
 					echo ';' . PHP_EOL;
 					echo '},
-						onBeforeSubmitCard: function(e){
-							if(!e.target.classList.contains("wpwl-apple-pay-button")){
-								return validateHolder(e);
-							}
-						},
 						onChangeBrand: function(e){
 							$(".wpwl-brand-custom").css("opacity", "0.2");
 							$(".wpwl-brand-" + e).css("opacity", "5"); 
 						}
 					}
-					function validateHolder(e){
-						var holder = $(".wpwl-control-cardHolder").val();
-						if (holder.trim().length < 2){
-						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>");
-						  return false;
-						}
-						return true;
-					  }
 					</script>';
 					if ($this->operation == 'test') {
 						echo '<div class="testmode">';

@@ -21,11 +21,13 @@ For more information, check out our [website](https://www.cardcorp.com).
 
 ## Compatibility
 
-**Tested up to:**
+The latest version of this plugin has been developed and tested with the following environments in mind. Compatibility with newer versions of PHP, WordPress, or WooCommerce cannot be guaranteed — please exercise caution when using versions beyond those listed.
 
 - PHP: **8.2.0**
 - WordPress: **6.8.3**
 - WooCommerce: **10.2.2**
+
+We would advise disabling auto-updates for WooCommerce in particular to prevent possible issues with payments.
 
 ## Getting Started
 

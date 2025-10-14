@@ -606,6 +606,14 @@ $.each($(".product-quantity select"), function() {
 						var wpwlOptions = { 
 						style: "plain",' . PHP_EOL;
 					echo 'locale: "' . $lang . '",' . PHP_EOL;
+					if (strpos($this->cards, 'APPLEPAY') !== false && $i == 0) {
+						echo 'applePay: {' . PHP_EOL;
+						echo '    merchantIdentifier: "' . esc_js($this->ENTITY_ID) . '",' . PHP_EOL;
+						echo '    checkAvailability: "applePayCapabilities",' . PHP_EOL;
+						echo '    buttonType: "pay",' . PHP_EOL;
+						echo '    buttonColor: "white"' . PHP_EOL;
+						echo '},' . PHP_EOL;
+					}
 					echo 'showCVVHint: true,
 						brandDetection: true,
 						showPlaceholders: true,
@@ -619,7 +627,9 @@ $.each($(".product-quantity select"), function() {
 							surname: "Lastname",
 							cardHolder: "Cardholder",
 						},
+						allowEmptyCardHolderName: false,
 						errorMessages: {
+						    cardHolderError: "Invalid card holder",
 							givenNameError: "Invalid Firstname",
 							surNameError: "Invalid Lastname",
 						},

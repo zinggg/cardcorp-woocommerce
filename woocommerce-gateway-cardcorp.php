@@ -214,6 +214,21 @@ function init_woocommerce_cardcorp()
 						$( cardcorp_test_fields ).closest( 'tr' ).show(); 
 					} 
 				}).change();
+
+				function toggleGooglePayField() {
+                    var selectedCards = $('#woocommerce_cardcorp_card_supported').val() || [];
+                    var operationMode = $('#woocommerce_cardcorp_operation_mode').val();
+            
+                    if (selectedCards.includes('GOOGLEPAY') && operationMode === 'live') {
+                        $('#woocommerce_cardcorp_googlepay_mid').closest('tr').show();
+                    } else {
+                        $('#woocommerce_cardcorp_googlepay_mid').closest('tr').hide();
+                    }
+               }
+        
+                $('#woocommerce_cardcorp_card_supported').on('change', toggleGooglePayField);
+                $('#woocommerce_cardcorp_operation_mode').on('change', toggleGooglePayField);
+                toggleGooglePayField(); 
 			});");
 		}
 
@@ -404,6 +419,7 @@ function init_woocommerce_cardcorp()
 						'MASTER' 		=> 'MASTER',
 						'MAESTRO' 		=> 'MAESTRO',
 						'APPLEPAY' 		=> 'APPLEPAY',
+						'GOOGLEPAY' 	=> 'GOOGLEPAY',
 					)
 				)
 			);
@@ -612,6 +628,17 @@ $.each($(".product-quantity select"), function() {
 						echo '    checkAvailability: "applePayCapabilities",' . PHP_EOL;
 						echo '    buttonType: "pay",' . PHP_EOL;
 						echo '    buttonColor: "white"' . PHP_EOL;
+						echo '},' . PHP_EOL;
+					}
+					if (strpos($this->cards, 'GOOGLEPAY') !== false && $i == 0) {
+						echo 'googlePay: {' . PHP_EOL;
+						echo '    gatewayMerchantId: "' . esc_js($this->ENTITY_ID) . '",' . PHP_EOL;
+						
+						if ($this->operation == 'live') {
+							echo '    merchantId: "' . esc_js($this->settings['googlepay_mid']) . '",' . PHP_EOL;
+						}
+						echo '    buttonType: "pay",' . PHP_EOL;
+						echo '    buttonSizeMode: "fill",' . PHP_EOL;
 						echo '},' . PHP_EOL;
 					}
 					echo 'showCVVHint: true,

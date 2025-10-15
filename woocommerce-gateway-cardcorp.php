@@ -732,8 +732,8 @@ $.each($(".product-quantity select"), function() {
 					echo '<div id="cardcorp_payment_container">';
 					echo '<form action="' . $this->return_url . '" class="paymentWidgets" data-brands="' . $this->cards . '"></form>';
 					echo '<div class="cardcorp-logo-container">';
-					echo '<a href="https://cardcorp.com" target="_blank">';
-					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/cardcorp-dark.svg" width="100px" alt="CardCorp logo – Payment Gateway and Online Payment Solutions" title="CardCorp – Secure Online Payments & Payment Gateway Solutions">';
+					echo '<a href="https://cardcorp.com" target="_blank" title="CardCorp – Secure Online Payments & Payment Gateway Solutions">';
+					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/cardcorp-dark.svg" width="100px" alt="CardCorp logo – Payment Gateway and Online Payment Solutions">';
 					echo '</a>';
 					echo '</div>';
 					echo '</div>';

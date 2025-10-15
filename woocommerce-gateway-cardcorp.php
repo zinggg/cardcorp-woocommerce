@@ -216,19 +216,23 @@ function init_woocommerce_cardcorp()
 				}).change();
 
 				function toggleGooglePayField() {
-                    var selectedCards = $('#woocommerce_cardcorp_card_supported').val() || [];
-                    var operationMode = $('#woocommerce_cardcorp_operation_mode').val();
-            
-                    if (selectedCards.includes('GOOGLEPAY') && operationMode === 'live') {
-                        $('#woocommerce_cardcorp_googlepay_mid').closest('tr').show();
-                    } else {
-                        $('#woocommerce_cardcorp_googlepay_mid').closest('tr').hide();
-                    }
-               }
-        
-                $('#woocommerce_cardcorp_card_supported').on('change', toggleGooglePayField);
-                $('#woocommerce_cardcorp_operation_mode').on('change', toggleGooglePayField);
-                toggleGooglePayField(); 
+					var selectedCards = $('#woocommerce_cardcorp_card_supported').val() || [];
+					var operationMode = $('#woocommerce_cardcorp_operation_mode').val();
+
+					if (!Array.isArray(selectedCards)) {
+						selectedCards = [selectedCards];
+					}
+
+					if (selectedCards.indexOf('GOOGLEPAY') !== -1 && operationMode === 'live') {
+						$('#woocommerce_cardcorp_googlepay_mid').closest('tr').show();
+					} else {
+						$('#woocommerce_cardcorp_googlepay_mid').closest('tr').hide();
+					}
+				}
+
+				$('#woocommerce_cardcorp_card_supported').on('change', toggleGooglePayField);
+				$('#woocommerce_cardcorp_operation_mode').on('change', toggleGooglePayField);
+				toggleGooglePayField(); 
 			});");
 		}
 
@@ -387,6 +391,13 @@ function init_woocommerce_cardcorp()
 					'default' 			=> '',
 					'desc_tip'    		=> true
 				),
+				'googlepay_mid' 		=> array(
+					'title' 			=> 'Google Pay MID',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter your approved Google merchant identifier.',
+					'default' 			=> '',
+					'desc_tip'    		=> true,
+				),
 				'hr' 				=> array(
 					'title' 			=> '<hr>',
 					'type' 				=> 'title',
@@ -421,6 +432,13 @@ function init_woocommerce_cardcorp()
 						'APPLEPAY' 		=> 'APPLEPAY',
 						'GOOGLEPAY' 	=> 'GOOGLEPAY',
 					)
+				),
+				'googlepay_mid' 	=> array(
+					'title' 			=> 'Google Pay MID',
+					'type' 				=> 'text',
+					'description' 		=> 'Enter your Google Pay Merchant ID. Required when Google Pay is enabled in Live Mode.',
+					'default' 			=> '',
+					'desc_tip'    		=> true
 				)
 			);
 		}

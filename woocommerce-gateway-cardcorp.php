@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Plugin Name: WooCommerce Cardcorp Gateway
+ * Plugin Name: CardCorp Gateway
  * Plugin URI: https://cardcorp.com
- * Author: Cardcorp
+ * Author: CardCorp
  * Author URI: https://cardcorp.com
- * Description: WooCommerce plugin for accepting payments through Cardcorp.
- * Version: 1.6.1
- * Tested up to: 5.4.2
+ * Description: WooCommerce plugin for accepting payments through the CardCorp gateway.
+ * Version: 1.7.0
+ * Tested up to: 6.8.3
  * WC requires at least: 3.0
- * WC tested up to: 4.2.2
+ * WC tested up to: 10.2.2
  */
 
 include_once(dirname(__FILE__) . '/includes/cardcorp_additional.php');
@@ -64,8 +64,8 @@ function init_woocommerce_cardcorp()
 			global $woocommerce;
 
 			$this->id				= 'cardcorp';
-			$this->method_title 	= 'Cardcorp Payments';
-			$this->method_description = 'Cardcorp Payments';
+			$this->method_title 	= 'CardCorp Payments';
+			$this->method_description = 'CardCorp Payments';
 
 			$icon 				= plugins_url('/assets/images/general/cardcorp-dark.svg', __FILE__);
 			$icon_html			= $icon_html = $this->get_icon();
@@ -150,7 +150,7 @@ function init_woocommerce_cardcorp()
 
 
 		/**
-		 * Woocommerce Admin Panel Option Manage Cardcorp Settings here.
+		 * Woocommerce Admin Panel Option Manage CardCorp Settings here.
 		 *
 		 * @return void
 		 */
@@ -194,8 +194,8 @@ function init_woocommerce_cardcorp()
 		public function generalSettingsTab()
 		{
 		?>
-<h2>Cardcorp Payment Gateway</h2>
-<p>Cardcorp Configuration Settings</p>
+<h2>CardCorp Payment Gateway</h2>
+<p>CardCorp Configuration Settings</p>
 <table class="form-table">
     <?php $this->generate_settings_html(); ?>
 </table>
@@ -214,6 +214,25 @@ function init_woocommerce_cardcorp()
 						$( cardcorp_test_fields ).closest( 'tr' ).show(); 
 					} 
 				}).change();
+
+				function toggleGooglePayField() {
+					var selectedCards = $('#woocommerce_cardcorp_card_supported').val() || [];
+					var operationMode = $('#woocommerce_cardcorp_operation_mode').val();
+
+					if (!Array.isArray(selectedCards)) {
+						selectedCards = [selectedCards];
+					}
+
+					if (selectedCards.indexOf('GOOGLEPAY') !== -1 && operationMode === 'live') {
+						$('#woocommerce_cardcorp_googlepay_mid').closest('tr').show();
+					} else {
+						$('#woocommerce_cardcorp_googlepay_mid').closest('tr').hide();
+					}
+				}
+
+				$('#woocommerce_cardcorp_card_supported').on('change', toggleGooglePayField);
+				$('#woocommerce_cardcorp_operation_mode').on('change', toggleGooglePayField);
+				toggleGooglePayField(); 
 			});");
 		}
 
@@ -293,7 +312,7 @@ function init_woocommerce_cardcorp()
 		}
 
 		/**
-		 * Initialise Cardcorp Woo Plugin Settings Form Fields
+		 * Initialise CardCorp Woo Plugin Settings Form Fields
 		 *
 		 * @return void
 		 */
@@ -304,7 +323,7 @@ function init_woocommerce_cardcorp()
 				'enabled' 			=> array(
 					'title'				=> 'Enable/Disable',
 					'type' 				=> 'checkbox',
-					'label' 			=> 'Enable Cardcorp',
+					'label' 			=> 'Enable CardCorp',
 					'default' 			=> 'yes'
 				),
 				'force3ds' 			=> array(
@@ -315,7 +334,7 @@ function init_woocommerce_cardcorp()
 				),
 				'operation_mode' 	=> array(
 					'title' 			=> 'Operation Mode',
-					'default' 			=> 'Payments processed by Cardcorp',
+					'default' 			=> 'Payments processed by CardCorp',
 					'description' 		=> 'You can switch between different environments, by selecting the corresponding operation mode',
 					'type' 				=> 'select',
 					'class'				=> 'cardcorp_mode',
@@ -328,49 +347,56 @@ function init_woocommerce_cardcorp()
 					'title' 			=> 'Description',
 					'type' 				=> 'text',
 					'description' 		=> 'This controls the description which the user sees during checkout',
-					'default' 			=> 'Payments proccessed by Cardcorp',
+					'default' 			=> 'Payments processed by CardCorp',
 					'desc_tip'    		=> true
 				),
 				'test_credentials' 	=> array(
 					'title'       		=> 'API Test Credentials',
 					'type'        		=> 'title',
-					'description' 		=> 'Enter your Cardcorp Test API Credentials to process transactions via Cardcorp. 
-										You can get your Cardcorp Test Credentials via 
-										<a href="mailto:support@cardcorp.com">Cardcorp Support</a>',
+					'description' 		=> 'Enter your CardCorp Test API Credentials to process transactions via CardCorp. 
+										You can get your CardCorp Test Credentials via 
+										<a href="mailto:support@cardcorp.com">CardCorp Support</a>',
 				),
 				'test_entity_id' 	=> array(
 					'title' 			=> 'Test Entity ID',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Cardcorp Test Entity ID. This is needed in order to take the payment',
+					'description' 		=> 'Please enter your CardCorp Test Entity ID. This is needed in order to take the payment',
 					'default'			=> '',
 					'desc_tip'    		=> true
 				),
 				'test_access_token' => array(
 					'title' 			=> 'Test Access Token',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Cardcorp Test Access Token. This is needed in order to take the payment',
+					'description' 		=> 'Please enter your CardCorp Test Access Token. This is needed in order to take the payment',
 					'default' 			=> '',
 					'desc_tip'    		=> true
 				),
 				'live_credentials' 	=> array(
 					'title'       		=> 'API LIVE Credentials',
 					'type'        		=> 'title',
-					'description' 		=> 'Enter your Cardcorp Live API Credentials to process transactions via Cardcorp. You can get your Cardcorp Live Credentials via 
-										<a href="mailto:support@cardcorp.com">Cardcorp Support</a>',
+					'description' 		=> 'Enter your CardCorp Live API Credentials to process transactions via CardCorp. You can get your CardCorp Live Credentials via 
+										<a href="mailto:support@cardcorp.com">CardCorp Support</a>',
 				),
 				'entity_id' 		=> array(
 					'title' 			=> 'Entity ID',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Cardcorp Entity ID. This is needed in order to the take payment',
+					'description' 		=> 'Please enter your CardCorp Entity ID. This is needed in order to the take payment',
 					'default' 			=> '',
 					'desc_tip'    		=> true
 				),
 				'access_token' 		=> array(
 					'title' 			=> 'Access Token',
 					'type' 				=> 'text',
-					'description' 		=> 'Please enter your Cardcorp Access Token. This is needed in order to take the payment',
+					'description' 		=> 'Please enter your CardCorp Access Token. This is needed in order to take the payment',
 					'default' 			=> '',
 					'desc_tip'    		=> true
+				),
+				'googlepay_mid' 		=> array(
+					'title' 			=> 'Google Pay MID',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter your approved Google merchant identifier.',
+					'default' 			=> '',
+					'desc_tip'    		=> true,
 				),
 				'hr' 				=> array(
 					'title' 			=> '<hr>',
@@ -404,6 +430,7 @@ function init_woocommerce_cardcorp()
 						'MASTER' 		=> 'MASTER',
 						'MAESTRO' 		=> 'MAESTRO',
 						'APPLEPAY' 		=> 'APPLEPAY',
+						'GOOGLEPAY' 	=> 'GOOGLEPAY',
 					)
 				)
 			);
@@ -438,14 +465,14 @@ function init_woocommerce_cardcorp()
 			return $icon_html;
 		}
 
-		/* Adding Cardcorp Payment Button in checkout page. */
+		/* Adding CardCorp Payment Button in checkout page. */
 		function payment_fields()
 		{
 			if ($this->description) echo wpautop(wptexturize($this->description));
 		}
 
 		/**
-		 * Creating Cardcorp Payment Form.
+		 * Creating CardCorp Payment Form.
 		 *
 		 * @param int $order_id
 		 * @return void
@@ -606,6 +633,25 @@ $.each($(".product-quantity select"), function() {
 						var wpwlOptions = { 
 						style: "plain",' . PHP_EOL;
 					echo 'locale: "' . $lang . '",' . PHP_EOL;
+					if (strpos($this->cards, 'APPLEPAY') !== false && $i == 0) {
+						echo 'applePay: {' . PHP_EOL;
+						echo '    merchantIdentifier: "' . esc_js($this->ENTITY_ID) . '",' . PHP_EOL;
+						echo '    checkAvailability: "applePayCapabilities",' . PHP_EOL;
+						echo '    buttonType: "pay",' . PHP_EOL;
+						echo '    buttonColor: "white"' . PHP_EOL;
+						echo '},' . PHP_EOL;
+					}
+					if (strpos($this->cards, 'GOOGLEPAY') !== false && $i == 0) {
+						echo 'googlePay: {' . PHP_EOL;
+						echo '    gatewayMerchantId: "' . esc_js($this->ENTITY_ID) . '",' . PHP_EOL;
+						
+						if ($this->operation == 'live') {
+							echo '    merchantId: "' . esc_js($this->settings['googlepay_mid']) . '",' . PHP_EOL;
+						}
+						echo '    buttonType: "pay",' . PHP_EOL;
+						echo '    buttonSizeMode: "fill",' . PHP_EOL;
+						echo '},' . PHP_EOL;
+					}
 					echo 'showCVVHint: true,
 						brandDetection: true,
 						showPlaceholders: true,
@@ -619,15 +665,13 @@ $.each($(".product-quantity select"), function() {
 							surname: "Lastname",
 							cardHolder: "Cardholder",
 						},
+						allowEmptyCardHolderName: false,
 						errorMessages: {
+						    cardHolderError: "Invalid card holder",
 							givenNameError: "Invalid Firstname",
 							surNameError: "Invalid Lastname",
 						},
 						onReady: function(e) { 
-							$(".wpwl-form-card").find(".wpwl-button-pay").on("click", function(e){
-								validateHolder(e);
-							  });
-
 							$(".wpwl-group-cvv").after( $(".wpwl-group-cardHolder").detach()); 
 
 							var $toggleButton = $("button[data-action=show-initial-forms]");
@@ -673,24 +717,11 @@ $.each($(".product-quantity select"), function() {
 					}
 					echo ';' . PHP_EOL;
 					echo '},
-						onBeforeSubmitCard: function(e){
-							if(!e.target.classList.contains("wpwl-apple-pay-button")){
-								return validateHolder(e);
-							}
-						},
 						onChangeBrand: function(e){
 							$(".wpwl-brand-custom").css("opacity", "0.2");
 							$(".wpwl-brand-" + e).css("opacity", "5"); 
 						}
 					}
-					function validateHolder(e){
-						var holder = $(".wpwl-control-cardHolder").val();
-						if (holder.trim().length < 2){
-						  $(".wpwl-control-cardHolder").addClass("wpwl-has-error").after("<div class=\"wpwl-hint wpwl-hint-cardHolderError\">Invalid card holder</div>");
-						  return false;
-						}
-						return true;
-					  }
 					</script>';
 					if ($this->operation == 'test') {
 						echo '<div class="testmode">';
@@ -701,8 +732,8 @@ $.each($(".product-quantity select"), function() {
 					echo '<div id="cardcorp_payment_container">';
 					echo '<form action="' . $this->return_url . '" class="paymentWidgets" data-brands="' . $this->cards . '"></form>';
 					echo '<div class="cardcorp-logo-container">';
-					echo '<a href="https://cardcorp.com" target="_blank">';
-					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/cardcorp-dark.svg" width="100px">';
+					echo '<a href="https://cardcorp.com" target="_blank" title="CardCorp – Secure Online Payments & Payment Gateway Solutions">';
+					echo '<img src="' . plugins_url() . '/' . get_plugin_data(__FILE__)['TextDomain'] . '/assets/images/general/cardcorp-dark.svg" width="100px" alt="CardCorp logo – Payment Gateway and Online Payment Solutions">';
 					echo '</a>';
 					echo '</div>';
 					echo '</div>';
@@ -710,11 +741,11 @@ $.each($(".product-quantity select"), function() {
 				} else {
 					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
 						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
-						$order->add_order_note(sprintf('Cardcorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
-						cardcorp_write_log(sprintf('Cardcorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
+						$order->add_order_note(sprintf('CardCorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
+						cardcorp_write_log(sprintf('CardCorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
 					} else {
-						$order->add_order_note(sprintf('Cardcorp Configuration error: %s', $gtwresponse['body']));
-						cardcorp_write_log(sprintf('Cardcorp Configuration error: %s', $gtwresponse['body']));
+						$order->add_order_note(sprintf('CardCorp Configuration error: %s', $gtwresponse['body']));
+						cardcorp_write_log(sprintf('CardCorp Configuration error: %s', $gtwresponse['body']));
 					}
 					wc_add_notice('Configuration error', 'error');
 					wp_safe_redirect(wc_get_page_permalink('cart'));
@@ -773,9 +804,9 @@ $.each($(".product-quantity select"), function() {
 						}
 
 
-						$order->add_order_note(sprintf('Cardcorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						$order->add_order_note(sprintf('CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
 						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
-						cardcorp_write_log(sprintf('Cardcorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						cardcorp_write_log(sprintf('CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
 						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
 
 					$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
@@ -814,8 +845,8 @@ $.each($(".product-quantity select"), function() {
 						$resp_code = $status->result->code;
 						$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $status->result->description;
 						cardcorp_write_log($resp_code_translated);
-						$order->add_order_note(sprintf('Cardcorp Transaction Failed. The Transaction Status %s', $status->result->description));
-						cardcorp_write_log(sprintf('Cardcorp Transaction Failed. The Transaction Status %s', $status->result->description));
+						$order->add_order_note(sprintf('CardCorp Transaction Failed. The Transaction Status %s', $status->result->description));
+						cardcorp_write_log(sprintf('CardCorp Transaction Failed. The Transaction Status %s', $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
 					$astrxId = $status->id;
@@ -868,13 +899,13 @@ $.each($(".product-quantity select"), function() {
 			$response = json_decode($this->capture_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
-				$order->add_order_note(sprintf('Cardcorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
-				cardcorp_write_log(sprintf('Cardcorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
+				$order->add_order_note(sprintf('CardCorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('CardCorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
 				$order->update_status('wc-accepted');
 				return true;
 			} else {
-				$order->add_order_note(sprintf('Cardcorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
-				cardcorp_write_log(sprintf('Cardcorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
+				$order->add_order_note(sprintf('CardCorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
+				cardcorp_write_log(sprintf('CardCorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -928,13 +959,13 @@ $.each($(".product-quantity select"), function() {
 			$response = json_decode($this->reverse_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
-				$order->add_order_note(sprintf('Cardcorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
-				cardcorp_write_log(sprintf('Cardcorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
+				$order->add_order_note(sprintf('CardCorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('CardCorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
 				$order->update_status('wc-reversed');
 				return true;
 			} else {
-				$order->add_order_note(sprintf('Cardcorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
-				cardcorp_write_log(sprintf('Cardcorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
+				$order->add_order_note(sprintf('CardCorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
+				cardcorp_write_log(sprintf('CardCorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -1001,13 +1032,13 @@ $.each($(".product-quantity select"), function() {
 			$response = json_decode($this->refund_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
-				$order->add_order_note(sprintf('Cardcorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
-				cardcorp_write_log(sprintf('Cardcorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
+				$order->add_order_note(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
 				$order->update_status('wc-refunded');
 				return true;
 			} else {
-				$order->add_order_note(sprintf('Cardcorp Refund Request Failed. The Refund Status: %s', $response->result->description));
-				cardcorp_write_log(sprintf('Cardcorp Refund Request Failed. The Refund Status: %s', $response->result->description));
+				$order->add_order_note(sprintf('CardCorp Refund Request Failed. The Refund Status: %s', $response->result->description));
+				cardcorp_write_log(sprintf('CardCorp Refund Request Failed. The Refund Status: %s', $response->result->description));
 				return false;
 			}
 			return false;
@@ -1115,7 +1146,7 @@ $.each($(".product-quantity select"), function() {
 
 
 		/**
-		 * Report Payment to Cardcorp
+		 * Report Payment to CardCorp
 		 *
 		 * @param int $order_id
 		 * @return void
@@ -1142,7 +1173,7 @@ $.each($(".product-quantity select"), function() {
 	}
 
 	/**
-	 * Add the Cardcorp gateway to WooCommerce
+	 * Add the CardCorp gateway to WooCommerce
 	 *
 	 * @param array $methods
 	 * @return void

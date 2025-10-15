@@ -432,13 +432,6 @@ function init_woocommerce_cardcorp()
 						'APPLEPAY' 		=> 'APPLEPAY',
 						'GOOGLEPAY' 	=> 'GOOGLEPAY',
 					)
-				),
-				'googlepay_mid' 	=> array(
-					'title' 			=> 'Google Pay MID',
-					'type' 				=> 'text',
-					'description' 		=> 'Enter your Google Pay Merchant ID. Required when Google Pay is enabled in Live Mode.',
-					'default' 			=> '',
-					'desc_tip'    		=> true
 				)
 			);
 		}

@@ -1,6 +1,6 @@
 <div align="center">
-    <a href="https://www.cardcorp.com/" >
-        <img src="./assets/images/general/cardcorp-dark.svg" width="200" >
+    <a href="https://www.cardcorp.com/" title="CardCorp – Secure Online Payments & Payment Gateway Solutions">
+        <img src="./assets/images/general/cardcorp-dark.svg" width="200" alt="CardCorp logo – Payment Gateway and Online Payment Solutions">
     </a>
 </div>
 

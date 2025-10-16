@@ -6,7 +6,7 @@
  * Author: CardCorp
  * Author URI: https://cardcorp.com
  * Description: WooCommerce plugin for accepting payments through the CardCorp gateway.
- * Version: 1.7.0
+ * Version: 1.7.1
  * Tested up to: 6.8.3
  * WC requires at least: 3.0
  * WC tested up to: 10.2.2
@@ -680,11 +680,26 @@ $.each($(".product-quantity select"), function() {
 								$toggleButton.trigger("click");
 								$toggleButton.hide();
 							}
-							if ($cardForm.length && !$cardForm.prev(".cardcorp-alt-card-title").length) {
-								$cardForm.before("<p class=\"cardcorp-alt-card-title\">Use a different card</p>");
-							}
-							if (!$(".cardcorp-alt-card-title--registrations").length) {
+							var $cardContainers = $(".wpwl-container-card");
+							var $paymentContainer = $("#cardcorp_payment_container");
+							var hasSavedCards = $(".wpwl-container-registration .wpwl-registration").length > 0;
+							$paymentContainer.toggleClass("cardcorp-has-registrations", hasSavedCards);
+							$cardContainers.toggleClass("cardcorp-section--after-registrations", hasSavedCards);
+							if (hasSavedCards && !$(".cardcorp-alt-card-title--registrations").length) {
 								$(".wpwl-container-registration").prepend("<p class=\"cardcorp-alt-card-title cardcorp-alt-card-title--registrations\">Saved cards</p>");
+							}
+				if ($cardForm.length && !$cardForm.prev(".cardcorp-alt-card-title").length) {
+					var cardFormHeading = hasSavedCards ? "Use a different card" : "Enter your card details";
+					$cardForm.before("<p class=\"cardcorp-alt-card-title\">" + cardFormHeading + "</p>");
+				}
+
+				var $cardBrandGroup = $cardForm.find(".wpwl-group-brand");
+				$cardBrandGroup.addClass("cardcorp-brand-group").hide();
+
+				var $altPayments = $(".wpwl-container-virtualAccount-APPLEPAY, .wpwl-container-virtualAccount-GOOGLEPAY");
+							if ($altPayments.length && !$(".alt_payments_buttons_container").length) {
+								var $altContainer = $altPayments.wrapAll("<div class=\"alt_payments_buttons_container\"></div>").first().parent();
+								$altContainer.prepend("<p class=\"cardcorp-alt-card-title cardcorp-alt-card-title--alt-payments\">Or continue with</p>");
 							}
 
 						    $(".wpwl-group-cardNumber").after( $(".wpwl-group-cardHolder").detach());
@@ -717,10 +732,16 @@ $.each($(".product-quantity select"), function() {
 					}
 					echo ';' . PHP_EOL;
 					echo '},
-						onChangeBrand: function(e){
-							$(".wpwl-brand-custom").css("opacity", "0.2");
-							$(".wpwl-brand-" + e).css("opacity", "5"); 
+					onChangeBrand: function(e){
+						$(".wpwl-brand-custom").css("opacity", "0.2");
+						$(".wpwl-brand-" + e).css("opacity", "5"); 
+						var $brandGroup = $(".cardcorp-brand-group");
+						if (e) {
+							$brandGroup.show().addClass("cardcorp-brand-group--visible");
+						} else {
+							$brandGroup.hide().removeClass("cardcorp-brand-group--visible");
 						}
+					}
 					}
 					</script>';
 					if ($this->operation == 'test') {

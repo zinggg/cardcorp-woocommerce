@@ -6,7 +6,7 @@
  * Author: CardCorp
  * Author URI: https://cardcorp.com
  * Description: WooCommerce plugin for accepting payments through the CardCorp gateway.
- * Version: 1.7.1
+ * Version: 1.7.2
  * Tested up to: 6.8.3
  * WC requires at least: 3.0
  * WC tested up to: 10.2.2
@@ -414,7 +414,7 @@ function init_woocommerce_cardcorp()
 				),
 
 				'card_supported' 	=> array(
-					'title' 			=> 'Accepted Cards',
+					'title' 			=> 'Accepted Payment Methods',
 					'default' 			=>  array(
 						'VISA',
 						'MASTER',
@@ -449,6 +449,7 @@ function init_woocommerce_cardcorp()
 			$field_key = $this->get_field_key($key);
 			$value = $this->get_option($key, $data['default']);
 			$value = is_array($value) ? $value : array_filter(array($value));
+
 			$disabled = !empty($data['disabled']) ? 'disabled="disabled"' : '';
 
 			ob_start();

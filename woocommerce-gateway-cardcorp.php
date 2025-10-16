@@ -6,7 +6,7 @@
  * Author: CardCorp
  * Author URI: https://cardcorp.com
  * Description: WooCommerce plugin for accepting payments through the CardCorp gateway.
- * Version: 1.7.1
+ * Version: 1.7.2
  * Tested up to: 6.8.3
  * WC requires at least: 3.0
  * WC tested up to: 10.2.2
@@ -216,12 +216,10 @@ function init_woocommerce_cardcorp()
 				}).change();
 
 				function toggleGooglePayField() {
-					var selectedCards = $('#woocommerce_cardcorp_card_supported').val() || [];
+					var selectedCards = $('input[name=\"woocommerce_cardcorp_card_supported[]\"]:checked').map(function() {
+						return $(this).val();
+					}).get();
 					var operationMode = $('#woocommerce_cardcorp_operation_mode').val();
-
-					if (!Array.isArray(selectedCards)) {
-						selectedCards = [selectedCards];
-					}
 
 					if (selectedCards.indexOf('GOOGLEPAY') !== -1 && operationMode === 'live') {
 						$('#woocommerce_cardcorp_googlepay_mid').closest('tr').show();
@@ -230,7 +228,7 @@ function init_woocommerce_cardcorp()
 					}
 				}
 
-				$('#woocommerce_cardcorp_card_supported').on('change', toggleGooglePayField);
+				$('input[name=\"woocommerce_cardcorp_card_supported[]\"]').on('change', toggleGooglePayField);
 				$('#woocommerce_cardcorp_operation_mode').on('change', toggleGooglePayField);
 				toggleGooglePayField(); 
 			});");
@@ -416,15 +414,14 @@ function init_woocommerce_cardcorp()
 				),
 
 				'card_supported' 	=> array(
-					'title' 			=> 'Accepted Cards',
+					'title' 			=> 'Accepted Payment Methods',
 					'default' 			=>  array(
 						'VISA',
 						'MASTER',
 						'MAESTRO',
 						'APPLEPAY'
 					),
-					'css'   			=> 'height: 100%;',
-					'type' 				=> 'multiselect',
+					'type' 				=> 'cardcorp_checkbox_list',
 					'options' 		=> array(
 						'VISA' 			=> 'VISA',
 						'MASTER' 		=> 'MASTER',
@@ -434,6 +431,70 @@ function init_woocommerce_cardcorp()
 					)
 				)
 			);
+		}
+
+		public function generate_cardcorp_checkbox_list_html($key, $data)
+		{
+			$defaults = array(
+				'title'       => '',
+				'disabled'    => false,
+				'class'       => '',
+				'css'         => '',
+				'desc_tip'    => false,
+				'description' => '',
+				'options'     => array(),
+			);
+
+			$data = wp_parse_args($data, $defaults);
+			$field_key = $this->get_field_key($key);
+			$value = $this->get_option($key, $data['default']);
+			$value = is_array($value) ? $value : array_filter(array($value));
+
+			$disabled = !empty($data['disabled']) ? 'disabled="disabled"' : '';
+
+			ob_start();
+			?>
+<tr valign="top" id="<?php echo esc_attr($field_key); ?>_tr">
+    <th scope="row" class="titledesc">
+        <?php echo $this->get_tooltip_html($data); ?>
+        <label><?php echo wp_kses_post($data['title']); ?></label>
+    </th>
+    <td class="forminp forminp-cardcorp-checkbox-list">
+        <fieldset id="<?php echo esc_attr($field_key); ?>_container"
+            class="cardcorp-checkbox-list <?php echo esc_attr($data['class']); ?>"
+            style="<?php echo esc_attr($data['css']); ?>">
+            <?php echo $this->get_description_html($data); ?>
+            <?php foreach ($data['options'] as $option_key => $option_label) { ?>
+            <label style="display:block; margin-bottom:4px;">
+                <input type="checkbox" name="<?php echo esc_attr($field_key); ?>[]"
+                    value="<?php echo esc_attr($option_key); ?>" <?php checked(in_array($option_key, $value, true)); ?>
+                    <?php echo $disabled; ?> />
+                <?php echo esc_html($option_label); ?>
+            </label>
+            <?php } ?>
+        </fieldset>
+    </td>
+</tr>
+<?php
+			return ob_get_clean();
+		}
+
+		public function validate_cardcorp_checkbox_list_field($key, $value)
+		{
+			$field_key = $this->get_field_key($key);
+			$posted_values = isset($_POST[$field_key]) ? (array) wp_unslash($_POST[$field_key]) : array();
+			$allowed_values = isset($this->form_fields[$key]['options']) ? array_keys($this->form_fields[$key]['options']) : array();
+
+			$sanitized = array();
+
+			foreach ($posted_values as $posted_value) {
+				$clean_value = wc_clean($posted_value);
+				if (in_array($clean_value, $allowed_values, true)) {
+					$sanitized[] = $clean_value;
+				}
+			}
+
+			return $sanitized;
 		}
 
 		/**

@@ -176,6 +176,10 @@
   #cardcorp_payment_container .wpwl-wrapper-registration-expiry {
     font-size: 0.875rem !important;
   }
+
+  #cardcorp_payment_container .wpwl-group.wpwl-group-brand {
+    right: 14px !important;
+  }
 }
 
 #cardcorp_payment_container
@@ -305,21 +309,14 @@
 }
 
 .wpwl-group.wpwl-group-brand {
-  width: 145px;
-  height: 36px;
-  position: absolute;
-  top: 28px;
-  right: -77px;
-  z-index: 2;
+  width: 100%;
+  display: block;
+  margin-bottom: var(--cardcorp-spacing-sm);
+  text-align: center;
+  grid-row: 1;
 }
 
-.wpwl-group.wpwl-group-brand > * {
-  position: absolute;
-}
-
-#cardcorp_payment_container
-  .wpwl-wrapper-brand
-  .wpwl-control.wpwl-control-brand {
+#cardcorp_payment_container .wpwl-group.wpwl-group-brand .wpwl-wrapper-brand {
   display: none;
 }
 
@@ -771,44 +768,19 @@
   border: none;
 }
 
-.wpwl-wrapper.wpwl-wrapper-brand .wpwl-control.wpwl-control-brand {
+#cardcorp_payment_container .wpwl-form.wpwl-form-card .wpwl-wrapper-brand {
   display: none;
 }
 
 #cardcorp_payment_container .wpwl-group.wpwl-group-brand {
-  display: none;
-}
-
-#cardcorp_payment_container
-  .cardcorp-brand-group.cardcorp-brand-group--visible {
-  display: block !important;
-  position: relative;
-  width: 100%;
-  padding-top: var(--cardcorp-spacing-sm);
-  margin-top: calc(var(--cardcorp-spacing-sm) * -1);
-}
-
-#cardcorp_payment_container
-  .cardcorp-brand-group.cardcorp-brand-group--visible::before {
-  content: "";
+  width: 145px;
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 1px;
-  background-color: var(--cardcorp-gray-10);
+  z-index: 2;
+  top: 26px;
+  right: -80px;
 }
 
-#cardcorp_payment_container
-  .cardcorp-brand-group.cardcorp-brand-group--visible
-  .wpwl-brand {
-  margin: var(--cardcorp-spacing-sm) auto 0;
-  display: block;
-  width: 48px;
-  height: 30px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+#cardcorp_payment_container .wpwl-group.wpwl-group-brand .wpwl-brand {
 }
 
 .cardcorp-logo-container {

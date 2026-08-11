@@ -6,7 +6,7 @@
  * Author: CardCorp
  * Author URI: https://cardcorp.com
  * Description: WooCommerce plugin for accepting payments through the CardCorp gateway.
- * Version: 1.7.2
+ * Version: 1.7.3
  * Tested up to: 6.8.3
  * WC requires at least: 3.0
  * WC tested up to: 10.2.2
@@ -81,6 +81,7 @@ function init_woocommerce_cardcorp()
 			$this->operation		= $this->settings['operation_mode'];
 			$this->supports			= array('refunds');
 			$this->basket			= $this->settings['basket'] == 'yes';
+			$this->merchant_url		= $this->get_option('merchant_url');
 
 			if ($this->operation == 'live') {
 				$this->cardcorp_url			= "https://eu-prod.oppwa.com";
@@ -396,6 +397,13 @@ function init_woocommerce_cardcorp()
 					'default' 			=> '',
 					'desc_tip'    		=> true,
 				),
+				'merchant_url' 		=> array(
+					'title' 			=> 'Merchant URL',
+					'type' 				=> 'text',
+					'description' 		=> 'Please enter the merchant website URL sent to CardCorp with each transaction. Leave blank to omit it from the request.',
+					'default' 			=> '',
+					'desc_tip'    		=> true,
+				),
 				'hr' 				=> array(
 					'title' 			=> '<hr>',
 					'type' 				=> 'title',
@@ -587,6 +595,10 @@ function init_woocommerce_cardcorp()
 				. "&customer.surname=" . $order->get_billing_last_name()
 				. "&customer.merchantCustomerId=" . $customer
 				. "&integrity=true";
+
+			if (!empty($this->merchant_url)) {
+				$data .= "&merchant.url=" . urlencode($this->merchant_url);
+			}
 
 			if($this->settings['force3ds'] == 'yes'){
 				$data .= "&threeDSecure.challengeIndicator=04"; 

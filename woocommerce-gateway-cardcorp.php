@@ -305,7 +305,7 @@ function init_woocommerce_cardcorp()
 		?>
 <h3>Logs</h3>
 
-<textarea class="large-text logs_textarea" disabled="" rows="30"><?= esc_textarea(get_cardcorp_logs()); ?></textarea>
+<textarea class="large-text logs_textarea" disabled="" rows="30"><?= esc_textarea(wp_check_invalid_utf8(get_cardcorp_logs(), true)); ?></textarea>
 
 <?php
 		}
@@ -858,7 +858,7 @@ $.each($(".product-quantity select"), function() {
 			if (!is_string($value) || strlen($value) > 160) {
 				return false;
 			}
-			return preg_match('#^/v1/checkouts/[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*/payment$#', $value) ? $value : false;
+			return preg_match('#^/v1/checkouts/[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*/payment$#D', $value) ? $value : false;
 		}
 
 		/**
@@ -872,7 +872,7 @@ $.each($(".product-quantity select"), function() {
 			if (!is_string($value) || strlen($value) > 64) {
 				return false;
 			}
-			return preg_match('#^[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*$#', $value) ? $value : false;
+			return preg_match('#^[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*$#D', $value) ? $value : false;
 		}
 
 		/**
@@ -922,7 +922,7 @@ $.each($(".product-quantity select"), function() {
 
 				if (!is_wp_error($gtwresponse)) {
 					$status = json_decode($gtwresponse['body']);
-					if (!is_object($status) || !isset($status->result->code) || !isset($status->merchantTransactionId) || !is_scalar($status->merchantTransactionId)) {
+					if (!is_object($status) || !isset($status->result->code)) {
 						return;
 					}
 					$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
@@ -930,15 +930,28 @@ $.each($(".product-quantity select"), function() {
 						// Connector and integrator test results only apply to the test environment
 						$success_code = array_diff($success_code, array('000.100.110', '000.100.111', '000.100.112'));
 					}
-					$order = wc_get_order(substr((string) $status->merchantTransactionId, 0, -4));
+					$order = isset($status->merchantTransactionId) && is_scalar($status->merchantTransactionId) ? wc_get_order(substr((string) $status->merchantTransactionId, 0, -4)) : false;
 					if (!$order) {
-						return;
+						// No order to update (e.g. expired checkout), send the shopper back to the checkout page
+						$astrx_id = isset($status->id) ? $this->cardcorp_valid_payment_id($status->id) : false;
+						$url = wc_get_checkout_url();
+						if ($astrx_id) {
+							$url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . 'astrxId=' . $astrx_id;
+						}
+						wp_redirect($url);
+						exit;
 					}
 					if (in_array($status->result->code, $success_code)) {
 
 						if (!$this->cardcorp_status_matches_order($status, $order)) {
-							$order->add_order_note('CardCorp Transaction not completed: the payment details did not match the order.');
-							cardcorp_write_log(sprintf('CardCorp Transaction not completed for order %s: payment details did not match.', $order->get_id()));
+							$mismatch_note = sprintf(
+								'CardCorp Transaction not completed: the payment details did not match the order. The Transaction ID was %s, amount %s %s.',
+								isset($status->id) && $this->cardcorp_valid_payment_id($status->id) ? $status->id : '-',
+								isset($status->amount) && is_numeric($status->amount) ? $status->amount : '-',
+								isset($status->currency) && is_string($status->currency) && preg_match('/^[A-Za-z]{3}$/D', $status->currency) ? strtoupper($status->currency) : '-'
+							);
+							$order->add_order_note($mismatch_note);
+							cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $mismatch_note));
 							wp_redirect(wc_get_checkout_url());
 							exit;
 						}

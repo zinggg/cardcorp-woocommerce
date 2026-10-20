@@ -1245,6 +1245,9 @@ $.each($(".product-quantity select"), function() {
 		function parse_value_cardcorp_error($order_id)
 		{
 			if (isset($_REQUEST['astrxId'])) {
+				if (!$this->cardcorp_valid_payment_id(wp_unslash($_REQUEST['astrxId']))) {
+					return;
+				}
 				$astrxId = $_REQUEST['astrxId'];
 				$gwresponse = json_decode($this->report_payment($order_id));
 				include_once(dirname(__FILE__) . '/includes/error_list.php');
@@ -1254,7 +1257,7 @@ $.each($(".product-quantity select"), function() {
 
 <div class="woocommerce">
     <ul class="woocommerce-error" role="alert">
-        <li><?= sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated); ?> * </li>
+        <li><?= sprintf('Transaction Unsuccessful. The status message <b>%s</b>', esc_html($resp_code_translated)); ?> * </li>
     </ul>
 </div>
 <?php }
@@ -1314,7 +1317,13 @@ $.each($(".product-quantity select"), function() {
 		function report_payment($order_id)
 		{
 			$url = $this->cardcorp_url . "/v1/query/";
-			$url .= $_REQUEST['astrxId'];
+			if (isset($_REQUEST['astrxId'])) {
+				$astrx_id = $this->cardcorp_valid_payment_id(wp_unslash($_REQUEST['astrxId']));
+				if (!$astrx_id) {
+					return;
+				}
+				$url .= $astrx_id;
+			}
 			$url .= "?entityId=" . $this->ENTITY_ID;
 			$head_data = "Bearer " . $this->ACCESS_TOKEN;
 			$gtwresponse = wp_remote_post(

@@ -862,6 +862,41 @@ $.each($(".product-quantity select"), function() {
 		}
 
 		/**
+		 * Payment or transaction identifier as issued by the gateway
+		 *
+		 * @param mixed $value
+		 * @return string|false
+		 */
+		private function cardcorp_valid_payment_id($value)
+		{
+			if (!is_string($value) || strlen($value) > 64) {
+				return false;
+			}
+			return preg_match('#^[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*$#', $value) ? $value : false;
+		}
+
+		/**
+		 * Compare the payment status details with the order they refer to
+		 *
+		 * @param object $status
+		 * @param WC_Order $order
+		 * @return bool
+		 */
+		private function cardcorp_status_matches_order($status, $order)
+		{
+			if (!isset($status->id) || !$this->cardcorp_valid_payment_id($status->id)) {
+				return false;
+			}
+			if (!isset($status->amount) || !is_numeric($status->amount) || abs((float) $status->amount - (float) $order->get_total()) >= 0.005) {
+				return false;
+			}
+			if (!isset($status->currency) || !is_string($status->currency)) {
+				return false;
+			}
+			return in_array(strtoupper($status->currency), array(get_woocommerce_currency(), $order->get_currency()), true);
+		}
+
+		/**
 		 * Updating the Payment Status and redirect to Success/Fail Page
 		 *
 		 * @return void
@@ -887,10 +922,26 @@ $.each($(".product-quantity select"), function() {
 
 				if (!is_wp_error($gtwresponse)) {
 					$status = json_decode($gtwresponse['body']);
+					if (!is_object($status) || !isset($status->result->code) || !isset($status->merchantTransactionId) || !is_scalar($status->merchantTransactionId)) {
+						return;
+					}
 					$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
-					$order = new WC_Order(substr($status->merchantTransactionId, 0, -4));
+					if ($this->operation == 'live') {
+						// Connector and integrator test results only apply to the test environment
+						$success_code = array_diff($success_code, array('000.100.110', '000.100.111', '000.100.112'));
+					}
+					$order = wc_get_order(substr((string) $status->merchantTransactionId, 0, -4));
+					if (!$order) {
+						return;
+					}
 					if (in_array($status->result->code, $success_code)) {
 
+						if (!$this->cardcorp_status_matches_order($status, $order)) {
+							$order->add_order_note('CardCorp Transaction not completed: the payment details did not match the order.');
+							cardcorp_write_log(sprintf('CardCorp Transaction not completed for order %s: payment details did not match.', $order->get_id()));
+							wp_redirect(wc_get_checkout_url());
+							exit;
+						}
 
 						if (isset($status->registrationId) && !empty($status->registrationId)) {
 							$tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
@@ -958,7 +1009,7 @@ $.each($(".product-quantity select"), function() {
 						cardcorp_write_log(sprintf('CardCorp Transaction Failed. The Transaction Status %s', $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
-					$astrxId = $status->id;
+					$astrxId = isset($status->id) && is_scalar($status->id) ? rawurlencode((string) $status->id) : '';
 					$query = parse_url(wc_get_checkout_url(), PHP_URL_QUERY);
 					if ($query) {
 						$url = wc_get_checkout_url() . '&astrxId=' . $astrxId;

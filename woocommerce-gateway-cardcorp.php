@@ -6,7 +6,7 @@
  * Author: CardCorp
  * Author URI: https://cardcorp.com
  * Description: WooCommerce plugin for accepting payments through the CardCorp gateway.
- * Version: 1.7.3
+ * Version: 1.7.4
  * Tested up to: 6.8.3
  * WC requires at least: 3.0
  * WC tested up to: 10.2.2
@@ -305,7 +305,7 @@ function init_woocommerce_cardcorp()
 		?>
 <h3>Logs</h3>
 
-<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_cardcorp_logs(); ?></textarea>
+<textarea class="large-text logs_textarea" disabled="" rows="30"><?= esc_textarea(wp_check_invalid_utf8(get_cardcorp_logs(), true)); ?></textarea>
 
 <?php
 		}
@@ -848,6 +848,55 @@ $.each($(".product-quantity select"), function() {
 		}
 
 		/**
+		 * Checkout status path returned by the payment widget, e.g. /v1/checkouts/{checkoutId}/payment
+		 *
+		 * @param mixed $value
+		 * @return string|false
+		 */
+		private function cardcorp_valid_resource_path($value)
+		{
+			if (!is_string($value) || strlen($value) > 160) {
+				return false;
+			}
+			return preg_match('#^/v1/checkouts/[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*/payment$#D', $value) ? $value : false;
+		}
+
+		/**
+		 * Payment or transaction identifier as issued by the gateway
+		 *
+		 * @param mixed $value
+		 * @return string|false
+		 */
+		private function cardcorp_valid_payment_id($value)
+		{
+			if (!is_string($value) || strlen($value) > 64) {
+				return false;
+			}
+			return preg_match('#^[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*$#D', $value) ? $value : false;
+		}
+
+		/**
+		 * Compare the payment status details with the order they refer to
+		 *
+		 * @param object $status
+		 * @param WC_Order $order
+		 * @return bool
+		 */
+		private function cardcorp_status_matches_order($status, $order)
+		{
+			if (!isset($status->id) || !$this->cardcorp_valid_payment_id($status->id)) {
+				return false;
+			}
+			if (!isset($status->amount) || !is_numeric($status->amount) || abs((float) $status->amount - (float) $order->get_total()) >= 0.005) {
+				return false;
+			}
+			if (!isset($status->currency) || !is_string($status->currency)) {
+				return false;
+			}
+			return in_array(strtoupper($status->currency), array(get_woocommerce_currency(), $order->get_currency()), true);
+		}
+
+		/**
 		 * Updating the Payment Status and redirect to Success/Fail Page
 		 *
 		 * @return void
@@ -856,8 +905,9 @@ $.each($(".product-quantity select"), function() {
 		{
 			global $woocommerce;
 			global $wpdb;
-			if (isset($_GET['resourcePath'])) {
-				$url = $this->cardcorp_url . $_GET['resourcePath'];
+			$resource_path = isset($_GET['resourcePath']) ? $this->cardcorp_valid_resource_path(wp_unslash($_GET['resourcePath'])) : false;
+			if ($resource_path) {
+				$url = $this->cardcorp_url . $resource_path;
 				$url .= "?entityId=" . $this->ENTITY_ID;
 				$head_data = "Bearer " . $this->ACCESS_TOKEN;
 				$gtwresponse = wp_remote_post(
@@ -872,10 +922,39 @@ $.each($(".product-quantity select"), function() {
 
 				if (!is_wp_error($gtwresponse)) {
 					$status = json_decode($gtwresponse['body']);
+					if (!is_object($status) || !isset($status->result->code)) {
+						return;
+					}
 					$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
-					$order = new WC_Order(substr($status->merchantTransactionId, 0, -4));
+					if ($this->operation == 'live') {
+						// Connector and integrator test results only apply to the test environment
+						$success_code = array_diff($success_code, array('000.100.110', '000.100.111', '000.100.112'));
+					}
+					$order = isset($status->merchantTransactionId) && is_scalar($status->merchantTransactionId) ? wc_get_order(substr((string) $status->merchantTransactionId, 0, -4)) : false;
+					if (!$order) {
+						// No order to update (e.g. expired checkout), send the shopper back to the checkout page
+						$astrx_id = isset($status->id) ? $this->cardcorp_valid_payment_id($status->id) : false;
+						$url = wc_get_checkout_url();
+						if ($astrx_id) {
+							$url .= (parse_url($url, PHP_URL_QUERY) ? '&' : '?') . 'astrxId=' . $astrx_id;
+						}
+						wp_redirect($url);
+						exit;
+					}
 					if (in_array($status->result->code, $success_code)) {
 
+						if (!$this->cardcorp_status_matches_order($status, $order)) {
+							$mismatch_note = sprintf(
+								'CardCorp Transaction not completed: the payment details did not match the order. The Transaction ID was %s, amount %s %s.',
+								isset($status->id) && $this->cardcorp_valid_payment_id($status->id) ? $status->id : '-',
+								isset($status->amount) && is_numeric($status->amount) ? $status->amount : '-',
+								isset($status->currency) && is_string($status->currency) && preg_match('/^[A-Za-z]{3}$/D', $status->currency) ? strtoupper($status->currency) : '-'
+							);
+							$order->add_order_note($mismatch_note);
+							cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $mismatch_note));
+							wp_redirect(wc_get_checkout_url());
+							exit;
+						}
 
 						if (isset($status->registrationId) && !empty($status->registrationId)) {
 							$tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
@@ -943,7 +1022,7 @@ $.each($(".product-quantity select"), function() {
 						cardcorp_write_log(sprintf('CardCorp Transaction Failed. The Transaction Status %s', $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
-					$astrxId = $status->id;
+					$astrxId = isset($status->id) && is_scalar($status->id) ? rawurlencode((string) $status->id) : '';
 					$query = parse_url(wc_get_checkout_url(), PHP_URL_QUERY);
 					if ($query) {
 						$url = wc_get_checkout_url() . '&astrxId=' . $astrxId;
@@ -1121,14 +1200,17 @@ $.each($(".product-quantity select"), function() {
 			$order = wc_get_order($order_id);
 			$order_data = $order->get_data();
 			$order_trx_id_cardcorp = $order_data['transaction_id'];
-			$amount 	= $order->get_total();
+			$full_refund = $amount === null || $amount === '' || abs((float) $amount - (float) $order->get_total()) < 0.005;
+			$amount 	= $full_refund ? $order->get_total() : number_format((float) $amount, 2, '.', '');
 			$currency 	= get_woocommerce_currency();
 			$response = json_decode($this->refund_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
 				cardcorp_write_log(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
-				$order->update_status('wc-refunded');
+				if ($full_refund) {
+					$order->update_status('wc-refunded');
+				}
 				return true;
 			} else {
 				$order->add_order_note(sprintf('CardCorp Refund Request Failed. The Refund Status: %s', $response->result->description));
@@ -1179,6 +1261,9 @@ $.each($(".product-quantity select"), function() {
 		function parse_value_cardcorp_error($order_id)
 		{
 			if (isset($_REQUEST['astrxId'])) {
+				if (!$this->cardcorp_valid_payment_id(wp_unslash($_REQUEST['astrxId']))) {
+					return;
+				}
 				$astrxId = $_REQUEST['astrxId'];
 				$gwresponse = json_decode($this->report_payment($order_id));
 				include_once(dirname(__FILE__) . '/includes/error_list.php');
@@ -1188,7 +1273,7 @@ $.each($(".product-quantity select"), function() {
 
 <div class="woocommerce">
     <ul class="woocommerce-error" role="alert">
-        <li><?= sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated); ?> * </li>
+        <li><?= sprintf('Transaction Unsuccessful. The status message <b>%s</b>', esc_html($resp_code_translated)); ?> * </li>
     </ul>
 </div>
 <?php }
@@ -1248,7 +1333,13 @@ $.each($(".product-quantity select"), function() {
 		function report_payment($order_id)
 		{
 			$url = $this->cardcorp_url . "/v1/query/";
-			$url .= $_REQUEST['astrxId'];
+			if (isset($_REQUEST['astrxId'])) {
+				$astrx_id = $this->cardcorp_valid_payment_id(wp_unslash($_REQUEST['astrxId']));
+				if (!$astrx_id) {
+					return;
+				}
+				$url .= $astrx_id;
+			}
 			$url .= "?entityId=" . $this->ENTITY_ID;
 			$head_data = "Bearer " . $this->ACCESS_TOKEN;
 			$gtwresponse = wp_remote_post(

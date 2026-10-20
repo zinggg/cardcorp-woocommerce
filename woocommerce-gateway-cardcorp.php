@@ -848,6 +848,20 @@ $.each($(".product-quantity select"), function() {
 		}
 
 		/**
+		 * Checkout status path returned by the payment widget, e.g. /v1/checkouts/{checkoutId}/payment
+		 *
+		 * @param mixed $value
+		 * @return string|false
+		 */
+		private function cardcorp_valid_resource_path($value)
+		{
+			if (!is_string($value) || strlen($value) > 160) {
+				return false;
+			}
+			return preg_match('#^/v1/checkouts/[A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*/payment$#', $value) ? $value : false;
+		}
+
+		/**
 		 * Updating the Payment Status and redirect to Success/Fail Page
 		 *
 		 * @return void
@@ -856,8 +870,9 @@ $.each($(".product-quantity select"), function() {
 		{
 			global $woocommerce;
 			global $wpdb;
-			if (isset($_GET['resourcePath'])) {
-				$url = $this->cardcorp_url . $_GET['resourcePath'];
+			$resource_path = isset($_GET['resourcePath']) ? $this->cardcorp_valid_resource_path(wp_unslash($_GET['resourcePath'])) : false;
+			if ($resource_path) {
+				$url = $this->cardcorp_url . $resource_path;
 				$url .= "?entityId=" . $this->ENTITY_ID;
 				$head_data = "Bearer " . $this->ACCESS_TOKEN;
 				$gtwresponse = wp_remote_post(

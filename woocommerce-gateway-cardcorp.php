@@ -305,7 +305,7 @@ function init_woocommerce_cardcorp()
 		?>
 <h3>Logs</h3>
 
-<textarea class="large-text logs_textarea" disabled="" rows="30"><?= get_cardcorp_logs(); ?></textarea>
+<textarea class="large-text logs_textarea" disabled="" rows="30"><?= esc_textarea(get_cardcorp_logs()); ?></textarea>
 
 <?php
 		}

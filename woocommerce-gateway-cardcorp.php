@@ -1187,14 +1187,17 @@ $.each($(".product-quantity select"), function() {
 			$order = wc_get_order($order_id);
 			$order_data = $order->get_data();
 			$order_trx_id_cardcorp = $order_data['transaction_id'];
-			$amount 	= $order->get_total();
+			$full_refund = $amount === null || $amount === '' || abs((float) $amount - (float) $order->get_total()) < 0.005;
+			$amount 	= $full_refund ? $order->get_total() : number_format((float) $amount, 2, '.', '');
 			$currency 	= get_woocommerce_currency();
 			$response = json_decode($this->refund_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
 				cardcorp_write_log(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
-				$order->update_status('wc-refunded');
+				if ($full_refund) {
+					$order->update_status('wc-refunded');
+				}
 				return true;
 			} else {
 				$order->add_order_note(sprintf('CardCorp Refund Request Failed. The Refund Status: %s', $response->result->description));

@@ -670,6 +670,13 @@ function init_woocommerce_cardcorp()
 					echo '<p><a href="' . esc_url($this->get_return_url($order)) . '">View your order</a></p>';
 					return;
 				}
+				if ($answered && preg_match('/^(000\.400\.0[^3]|000\.400\.100)/', (string) $read_status->result->code)) {
+					// Manual review: the money is taken
+					$this->cardcorp_apply_payment($read_status, $order, true);
+					wc_print_notice('We received your payment, but it must be checked by the shop. Please do not pay again.', 'notice');
+					echo '<p><a href="' . esc_url($this->get_return_url($order)) . '">View your order</a></p>';
+					return;
+				}
 				if ($fresh) {
 					$checkout = (object) array('id' => $stored_id, 'integrity' => $stored['integrity']);
 				} elseif (!$answered) {

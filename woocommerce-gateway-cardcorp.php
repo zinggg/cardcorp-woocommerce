@@ -1267,7 +1267,7 @@ $.each($(".product-quantity select"), function() {
 			}
 			$raw = $this->capture_request($order_trx_id_cardcorp, $amount, $currency);
 			$response = is_wp_error($raw) ? null : json_decode($raw);
-			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030)/', (string) $response->result->code)) {
+			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030|000\.400\.0[^3]|000\.400\.100|000\.400\.1[12]0|000\.500\.|800\.400\.5|100\.400\.500)/', (string) $response->result->code)) {
 				$msg = 'CardCorp capture outcome unknown: check the back office before retrying';
 				$order->add_order_note($msg);
 				cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $msg));
@@ -1341,7 +1341,7 @@ $.each($(".product-quantity select"), function() {
 			}
 			$raw = $this->reverse_request($order_trx_id_cardcorp, $amount, $currency);
 			$response = is_wp_error($raw) ? null : json_decode($raw);
-			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030)/', (string) $response->result->code)) {
+			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030|000\.400\.0[^3]|000\.400\.100|000\.400\.1[12]0|000\.500\.|800\.400\.5|100\.400\.500)/', (string) $response->result->code)) {
 				$msg = 'CardCorp reversal outcome unknown: check the back office before retrying';
 				$order->add_order_note($msg);
 				cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $msg));
@@ -1429,7 +1429,7 @@ $.each($(".product-quantity select"), function() {
 			}
 			$raw = $this->refund_request($order_trx_id_cardcorp, $amount, $currency);
 			$response = is_wp_error($raw) ? null : json_decode($raw);
-			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030)/', (string) $response->result->code)) {
+			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030|000\.400\.0[^3]|000\.400\.100|000\.400\.1[12]0|000\.500\.|800\.400\.5|100\.400\.500)/', (string) $response->result->code)) {
 				$msg = 'CardCorp refund outcome unknown: check the back office before retrying';
 				$order->add_order_note($msg);
 				cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $msg));

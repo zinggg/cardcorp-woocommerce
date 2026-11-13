@@ -974,7 +974,7 @@ $.each($(".product-quantity select"), function() {
 							exit;
 						}
 
-						if (isset($status->registrationId) && !empty($status->registrationId)) {
+						if (isset($status->registrationId) && !empty($status->registrationId) && get_current_user_id() > 0) {
 							$tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
 							$cards = array();
 							foreach ($tokens as $token) {

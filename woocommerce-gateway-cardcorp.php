@@ -1080,11 +1080,27 @@ $.each($(".product-quantity select"), function() {
 					)
 				);
 
-				if (!is_wp_error($gtwresponse)) {
-					$status = json_decode($gtwresponse['body']);
-					if (!is_object($status) || !isset($status->result->code)) {
-						return;
+				$status = is_wp_error($gtwresponse) ? null : json_decode($gtwresponse['body']);
+				// A refused (rate-limited) answer is no answer either
+				$refused = !is_wp_error($gtwresponse) && ((int) wp_remote_retrieve_response_code($gtwresponse) === 429
+					|| (isset($status->result->code) && (string) $status->result->code === '800.120.100'));
+				if ($refused || !is_object($status) || !isset($status->result->code)) {
+					preg_match('#^/v1/checkouts/([^/]+)/payment$#', $resource_path, $m);
+					$checkout_id = isset($m[1]) ? $m[1] : '-';
+					$why = is_wp_error($gtwresponse) ? $gtwresponse->get_error_message() : ($refused ? 'request refused (rate limited)' : 'unreadable response');
+					cardcorp_write_log(sprintf('Checkout %s: payment status not readable: %s', $checkout_id, $why));
+					wc_add_notice('We could not confirm your payment yet. If you have paid, please do not pay again.', 'notice');
+					$found = wc_get_orders(array('limit' => 1, 'meta_query' => array(array('key' => '_cardcorp_checkout_id', 'value' => $checkout_id))));
+					$found = ($found && $found[0]->get_meta('_cardcorp_checkout_id') === $checkout_id) ? $found[0] : null;
+					if ($found) {
+						$found->add_order_note(sprintf('CardCorp payment status for checkout %s could not be read: %s', $checkout_id, $why));
+						wp_redirect($found->get_checkout_payment_url(true));
+						exit;
 					}
+					wp_redirect(wc_get_checkout_url());
+					exit;
+				}
+				{
 					$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 					if ($this->operation == 'live') {
 						// Connector and integrator test results only apply to the test environment

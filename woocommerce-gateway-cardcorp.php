@@ -551,6 +551,9 @@ function init_woocommerce_cardcorp()
 			global $woocommerce;
 
 			$order = new WC_Order($order_id);
+			if (!$order->needs_payment()) {
+				return;
+			}
 
 			$tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
 			$i = 0;
@@ -639,19 +642,91 @@ function init_woocommerce_cardcorp()
 
 
 
-			$head_data = "Bearer " . $this->ACCESS_TOKEN;
-			$gtwresponse = wp_remote_post(
-				$url,
-				array(
-					'headers' => array('Authorization' => $head_data),
-					'body' => $data,
-					'sslverify' => 'true', // this should be set to true in production
-					'timeout' => 200,
-				)
-			);
-			if (!is_wp_error($gtwresponse)) {
+			$fingerprint = hash('sha256', preg_replace('/&merchantTransactionId=[^&]*/', '', $data));
+			$checkout = null;
+			$stored_id = (string) $order->get_meta('_cardcorp_checkout_id');
+			$stored = $order->get_meta('_cardcorp_checkout_data');
+			if ($stored_id !== '' && is_array($stored)) {
+				$read = wp_remote_post(
+					$this->cardcorp_url . '/v1/checkouts/' . $stored_id . '/payment?entityId=' . $this->ENTITY_ID,
+					array(
+						'method' => 'GET',
+						'headers' => array('Authorization' => 'Bearer ' . $this->ACCESS_TOKEN),
+						'sslverify' => true,
+						'timeout' => 45
+					)
+				);
+				$read_status = is_wp_error($read) ? null : json_decode($read['body']);
+				// A refused (rate-limited) read is no answer
+				$answered = is_object($read_status) && isset($read_status->result->code)
+					&& (int) wp_remote_retrieve_response_code($read) !== 429
+					&& (string) $read_status->result->code !== '800.120.100';
+				$fresh = (time() - (int) $stored['created']) < 30 * MINUTE_IN_SECONDS && hash_equals((string) $stored['fingerprint'], $fingerprint);
+				$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
+				if ($this->operation == 'live') {
+					// Connector and integrator test results only apply to the test environment
+					$success_code = array_diff($success_code, array('000.100.110', '000.100.111', '000.100.112'));
+				}
+				if ($answered && in_array($read_status->result->code, $success_code)) {
+					$outcome = $this->cardcorp_apply_payment($read_status, $order);
+					wc_print_notice($outcome === 'mismatch'
+						? 'We received your payment, but it must be checked by the shop. Please do not pay again.'
+						: 'Your payment for this order has been received.', 'notice');
+					echo '<p><a href="' . esc_url($this->get_return_url($order)) . '">View your order</a></p>';
+					return;
+				}
+				if ($fresh) {
+					$checkout = (object) array('id' => $stored_id, 'integrity' => $stored['integrity']);
+				} elseif (!$answered) {
+					wc_print_notice('We could not check your previous payment. Please reload in a minute and do not pay again.', 'error');
+					return;
+				}
+			}
+			if ($checkout === null) {
+				$created_at = time();
+				$head_data = "Bearer " . $this->ACCESS_TOKEN;
+				$gtwresponse = wp_remote_post(
+					$url,
+					array(
+						'headers' => array('Authorization' => $head_data),
+						'body' => $data,
+						'sslverify' => 'true', // this should be set to true in production
+						'timeout' => 200,
+					)
+				);
+				if (is_wp_error($gtwresponse)) {
+					cardcorp_write_log(sprintf('Order %s: checkout not created: %s', $order->get_id(), $gtwresponse->get_error_message()));
+					wc_print_notice('We could not reach the payment service. Please reload this page in a minute.', 'error');
+					return;
+				}
 				$status = json_decode($gtwresponse['body']);
-				if (isset($status->id)) { ?>
+				if (!isset($status->id)) {
+					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
+						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
+						$order->add_order_note(sprintf('CardCorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
+						cardcorp_write_log(sprintf('Order %s: CardCorp Configuration error: Field: %s, Error: %s', $order->get_id(), $ee->name, $ee->message));
+					} else {
+						$order->add_order_note(sprintf('CardCorp Configuration error: %s', $gtwresponse['body']));
+						$err = json_decode($gtwresponse['body']);
+						cardcorp_write_log(sprintf('Order %s: CardCorp Configuration error: %s %s', $order->get_id(), isset($err->result->code) && is_scalar($err->result->code) ? $err->result->code : '-', isset($err->result->description) && is_scalar($err->result->description) ? $err->result->description : '-'));
+					}
+					wc_add_notice('Configuration error', 'error');
+					wp_safe_redirect(wc_get_page_permalink('cart'));
+					return;
+				}
+				$order->read_meta_data(true);
+				$other_id = (string) $order->get_meta('_cardcorp_checkout_id');
+				$other = $order->get_meta('_cardcorp_checkout_data');
+				if ($other_id !== '' && $other_id !== $stored_id && is_array($other)) {
+					$status = (object) array('id' => $other_id, 'integrity' => $other['integrity']);
+				} else {
+					$order->update_meta_data('_cardcorp_checkout_id', $status->id);
+					$order->update_meta_data('_cardcorp_checkout_data', array('integrity' => $status->integrity, 'created' => $created_at, 'fingerprint' => $fingerprint));
+					$order->save();
+				}
+			} else {
+				$status = $checkout;
+			} ?>
 
 <?php if ($this->basket) {
 						echo do_shortcode('[woocommerce_cart]');
@@ -849,23 +924,6 @@ $.each($(".product-quantity select"), function() {
 					echo '</div>';
 					echo '</div>';
 					
-				} else {
-					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
-						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
-						$order->add_order_note(sprintf('CardCorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
-						cardcorp_write_log(sprintf('Order %s: CardCorp Configuration error: Field: %s, Error: %s', $order->get_id(), $ee->name, $ee->message));
-					} else {
-						$order->add_order_note(sprintf('CardCorp Configuration error: %s', $gtwresponse['body']));
-						$err = json_decode($gtwresponse['body']);
-						cardcorp_write_log(sprintf('Order %s: CardCorp Configuration error: %s %s', $order->get_id(), isset($err->result->code) && is_scalar($err->result->code) ? $err->result->code : '-', isset($err->result->description) && is_scalar($err->result->description) ? $err->result->description : '-'));
-					}
-					wc_add_notice('Configuration error', 'error');
-					wp_safe_redirect(wc_get_page_permalink('cart'));
-				}
-			} else {
-				cardcorp_write_log(sprintf('Order %s: checkout not created: %s', $order->get_id(), $gtwresponse->get_error_message()));
-				wc_print_notice('We could not reach the payment service. Please reload this page in a minute.', 'error');
-			}
 		}
 
 		/**
@@ -918,6 +976,87 @@ $.each($(".product-quantity select"), function() {
 		}
 
 		/**
+		 * Apply a successful payment status to its order. Neither redirects nor exits
+		 *
+		 * @param object $status
+		 * @param WC_Order $order
+		 * @return string 'mismatch', 'second' or 'paid'
+		 */
+		private function cardcorp_apply_payment($status, $order)
+		{
+						if (!$this->cardcorp_status_matches_order($status, $order)) {
+							$mismatch_note = sprintf(
+								'CardCorp Transaction not completed: the payment details did not match the order. The Transaction ID was %s, amount %s %s.',
+								isset($status->id) && $this->cardcorp_valid_payment_id($status->id) ? $status->id : '-',
+								isset($status->amount) && is_numeric($status->amount) ? $status->amount : '-',
+								isset($status->currency) && is_string($status->currency) && preg_match('/^[A-Za-z]{3}$/D', $status->currency) ? strtoupper($status->currency) : '-'
+							);
+							$order->add_order_note($mismatch_note);
+							cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $mismatch_note));
+							if ($order->needs_payment()) {
+								$order->update_status('on-hold');
+							}
+							return 'mismatch';
+						}
+
+						$existing = (string) $order->get_transaction_id();
+						if ($existing !== '' && $existing !== (string) $status->id) {
+							$note = sprintf('CardCorp second payment %s on this order, which is already paid by %s: refund it in the CardCorp back office.', $status->id, $existing);
+							$order->add_order_note($note);
+							cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $note));
+							return 'second';
+						}
+
+						if (isset($status->registrationId) && !empty($status->registrationId) && get_current_user_id() > 0) {
+							$tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
+							$cards = array();
+							foreach ($tokens as $token) {
+								$cards[] = $token->get_token();
+							}
+							if (!in_array($status->registrationId, $cards)) {
+								$token = new WC_Payment_Token_CC();
+								$token->set_token($status->registrationId); // Token comes from payment processor
+								$token->set_gateway_id($this->id);
+								$token->set_last4($status->card->last4Digits);
+								$token->set_expiry_year($status->card->expiryYear);
+								$token->set_expiry_month($status->card->expiryMonth);
+								$token->set_card_type($status->paymentBrand);
+								$token->set_user_id(get_current_user_id());
+								$token->save();
+								WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
+							}
+						}
+
+
+						$order->add_order_note(sprintf('CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
+						cardcorp_write_log(sprintf('Order %s: CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						Payment type was %s. Authorisation bank code: %s', $order->get_id(), $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
+
+					$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
+					$bank_code = $status->resultDetails;
+					$astrxId = $status->id;
+
+					$order->payment_complete($status->id);
+					$order->update_meta_data('bank_code', $bank_code);
+					$order->update_meta_data('AS-TrxId', $astrxId);
+					$order->update_meta_data('_cardcorp_charged_currency', strtoupper($status->currency));
+					$order->save();
+
+						if (in_array($status->paymentType, array('DB'))) {
+							//$order->update_status('wc-accepted');
+							if (version_compare(WOOCOMMERCE_VERSION, "2.6") <= 0) {
+								$order->reduce_order_stock();
+							} else {
+								//wc_reduce_stock_levels($orderid);
+							}
+						} else {
+							$order->update_status('wc-preauth');
+						}
+						return 'paid';
+		}
+
+		/**
 		 * Updating the Payment Status and redirect to Success/Fail Page
 		 *
 		 * @return void
@@ -964,58 +1103,17 @@ $.each($(".product-quantity select"), function() {
 					}
 					if (in_array($status->result->code, $success_code)) {
 
-						if (!$this->cardcorp_status_matches_order($status, $order)) {
-							$mismatch_note = sprintf(
-								'CardCorp Transaction not completed: the payment details did not match the order. The Transaction ID was %s, amount %s %s.',
-								isset($status->id) && $this->cardcorp_valid_payment_id($status->id) ? $status->id : '-',
-								isset($status->amount) && is_numeric($status->amount) ? $status->amount : '-',
-								isset($status->currency) && is_string($status->currency) && preg_match('/^[A-Za-z]{3}$/D', $status->currency) ? strtoupper($status->currency) : '-'
-							);
-							$order->add_order_note($mismatch_note);
-							cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $mismatch_note));
-							if ($order->needs_payment()) {
-								$order->update_status('on-hold');
-							}
+						$outcome = $this->cardcorp_apply_payment($status, $order);
+						if ($outcome === 'mismatch') {
 							wc_add_notice('We received your payment, but it must be checked by the shop. Please do not pay again.', 'notice');
 							wp_redirect($this->get_return_url($order));
 							exit;
 						}
-
-						if (isset($status->registrationId) && !empty($status->registrationId) && get_current_user_id() > 0) {
-							$tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
-							$cards = array();
-							foreach ($tokens as $token) {
-								$cards[] = $token->get_token();
-							}
-							if (!in_array($status->registrationId, $cards)) {
-								$token = new WC_Payment_Token_CC();
-								$token->set_token($status->registrationId); // Token comes from payment processor
-								$token->set_gateway_id($this->id);
-								$token->set_last4($status->card->last4Digits);
-								$token->set_expiry_year($status->card->expiryYear);
-								$token->set_expiry_month($status->card->expiryMonth);
-								$token->set_card_type($status->paymentBrand);
-								$token->set_user_id(get_current_user_id());
-								$token->save();
-								WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
-							}
+						if ($outcome === 'second') {
+							wp_redirect($this->get_return_url($order));
+							exit;
 						}
-
-
-						$order->add_order_note(sprintf('CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
-						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
-						cardcorp_write_log(sprintf('Order %s: CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
-						Payment type was %s. Authorisation bank code: %s', $order->get_id(), $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
-
-					$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
-					$bank_code = $status->resultDetails;
 					$astrxId = $status->id;
-
-					$order->payment_complete($status->id);
-					$order->update_meta_data('bank_code', $bank_code);
-					$order->update_meta_data('AS-TrxId', $astrxId);
-					$order->update_meta_data('_cardcorp_charged_currency', strtoupper($status->currency));
-					$order->save();
 					WC()->cart->empty_cart();
 
 						/* Add content to the WC emails. */
@@ -1027,17 +1125,6 @@ $.each($(".product-quantity select"), function() {
 						}
 
 						wp_redirect($url);
-
-						if (in_array($status->paymentType, array('DB'))) {
-							//$order->update_status('wc-accepted');
-							if (version_compare(WOOCOMMERCE_VERSION, "2.6") <= 0) {
-								$order->reduce_order_stock();
-							} else {
-								//wc_reduce_stock_levels($orderid);
-							}
-						} else {
-							$order->update_status('wc-preauth');
-						}
 						exit;
 					} else {
 						include_once(dirname(__FILE__) . '/includes/error_list.php');
@@ -1048,6 +1135,12 @@ $.each($(".product-quantity select"), function() {
 						cardcorp_write_log(sprintf('Order %s: CardCorp Transaction Failed. The Transaction Status %s', $order->get_id(), $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
+						if (preg_match('#^/v1/checkouts/([^/]+)/payment$#', $resource_path, $m)
+							&& $order->get_meta('_cardcorp_checkout_id') === $m[1]) {
+							$order->delete_meta_data('_cardcorp_checkout_id');
+							$order->delete_meta_data('_cardcorp_checkout_data');
+							$order->save();
+						}
 					$astrxId = isset($status->id) && is_scalar($status->id) ? rawurlencode((string) $status->id) : '';
 					$query = parse_url(wc_get_checkout_url(), PHP_URL_QUERY);
 					if ($query) {

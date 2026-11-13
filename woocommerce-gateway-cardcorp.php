@@ -853,10 +853,11 @@ $.each($(".product-quantity select"), function() {
 					if (isset(json_decode($gtwresponse['body'])->result->parameterErrors[0]) && !empty(json_decode($gtwresponse['body'])->result->parameterErrors[0])) {
 						$ee = json_decode($gtwresponse['body'])->result->parameterErrors[0];
 						$order->add_order_note(sprintf('CardCorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
-						cardcorp_write_log(sprintf('CardCorp Configuration error: %s', 'Field: ' . $ee->name . ', Value: ' . $ee->value . ', Error:' . $ee->message));
+						cardcorp_write_log(sprintf('Order %s: CardCorp Configuration error: Field: %s, Error: %s', $order->get_id(), $ee->name, $ee->message));
 					} else {
 						$order->add_order_note(sprintf('CardCorp Configuration error: %s', $gtwresponse['body']));
-						cardcorp_write_log(sprintf('CardCorp Configuration error: %s', $gtwresponse['body']));
+						$err = json_decode($gtwresponse['body']);
+						cardcorp_write_log(sprintf('Order %s: CardCorp Configuration error: %s %s', $order->get_id(), isset($err->result->code) && is_scalar($err->result->code) ? $err->result->code : '-', isset($err->result->description) && is_scalar($err->result->description) ? $err->result->description : '-'));
 					}
 					wc_add_notice('Configuration error', 'error');
 					wp_safe_redirect(wc_get_page_permalink('cart'));
@@ -996,8 +997,8 @@ $.each($(".product-quantity select"), function() {
 
 						$order->add_order_note(sprintf('CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
 						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
-						cardcorp_write_log(sprintf('CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
-						Payment type was %s. Authorisation bank code: %s', $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
+						cardcorp_write_log(sprintf('Order %s: CardCorp Transaction Successful. The Transaction ID was %s and Payment Status %s. 
+						Payment type was %s. Authorisation bank code: %s', $order->get_id(), $status->id, $status->result->description, $status->paymentType, $status->resultDetails->ConnectorTxID3));
 
 					$message = sprintf('Transaction Successful. The status message <b>%s</b>', $status->result->description);
 					$bank_code = $status->resultDetails;
@@ -1035,9 +1036,9 @@ $.each($(".product-quantity select"), function() {
 						include_once(dirname(__FILE__) . '/includes/error_list.php');
 						$resp_code = $status->result->code;
 						$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $status->result->description;
-						cardcorp_write_log($resp_code_translated);
+						cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $resp_code_translated));
 						$order->add_order_note(sprintf('CardCorp Transaction Failed. The Transaction Status %s', $status->result->description));
-						cardcorp_write_log(sprintf('CardCorp Transaction Failed. The Transaction Status %s', $status->result->description));
+						cardcorp_write_log(sprintf('Order %s: CardCorp Transaction Failed. The Transaction Status %s', $order->get_id(), $status->result->description));
 						// $declinemessage = sprintf('Transaction Unsuccessful. The status message <b>%s</b>', $resp_code_translated ) ;
 						// wc_add_notice( $declinemessage, 'error' );
 					$astrxId = isset($status->id) && is_scalar($status->id) ? rawurlencode((string) $status->id) : '';
@@ -1099,12 +1100,12 @@ $.each($(".product-quantity select"), function() {
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
-				cardcorp_write_log(sprintf('CardCorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('Order %s: CardCorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $order->get_id(), $response->id, $response->result->description));
 				$order->update_status('wc-accepted');
 				return true;
 			} else {
 				$order->add_order_note(sprintf('CardCorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
-				cardcorp_write_log(sprintf('CardCorp Capture Request Failed. The Capture Status => %s. Code is == %s', $response->result->description, $response->result->code));
+				cardcorp_write_log(sprintf('Order %s: CardCorp Capture Request Failed. The Capture Status => %s. Code is == %s', $order->get_id(), $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -1167,12 +1168,12 @@ $.each($(".product-quantity select"), function() {
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
-				cardcorp_write_log(sprintf('CardCorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('Order %s: CardCorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $order->get_id(), $response->id, $response->result->description));
 				$order->update_status('wc-reversed');
 				return true;
 			} else {
 				$order->add_order_note(sprintf('CardCorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
-				cardcorp_write_log(sprintf('CardCorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $response->result->description, $response->result->code));
+				cardcorp_write_log(sprintf('Order %s: CardCorp Reversal Request Failed. The Reversal Status: %s. Code is: %s', $order->get_id(), $response->result->description, $response->result->code));
 				return false;
 			}
 			return false;
@@ -1249,14 +1250,14 @@ $.each($(".product-quantity select"), function() {
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
-				cardcorp_write_log(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
+				cardcorp_write_log(sprintf('Order %s: CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $order->get_id(), $response->id, $response->result->description));
 				if ($full_refund) {
 					$order->update_status('wc-refunded');
 				}
 				return true;
 			} else {
 				$order->add_order_note(sprintf('CardCorp Refund Request Failed. The Refund Status: %s', $response->result->description));
-				cardcorp_write_log(sprintf('CardCorp Refund Request Failed. The Refund Status: %s', $response->result->description));
+				cardcorp_write_log(sprintf('Order %s: CardCorp Refund Request Failed. The Refund Status: %s', $order->get_id(), $response->result->description));
 				return false;
 			}
 			return false;
@@ -1311,7 +1312,7 @@ $.each($(".product-quantity select"), function() {
 				include_once(dirname(__FILE__) . '/includes/error_list.php');
 				$resp_code = $gwresponse->result->code;
 				$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $gwresponse->result->description;
-				cardcorp_write_log($resp_code_translated); ?>
+				cardcorp_write_log(sprintf('Order %s: %s', $order_id, $resp_code_translated)); ?>
 
 <div class="woocommerce">
     <ul class="woocommerce-error" role="alert">

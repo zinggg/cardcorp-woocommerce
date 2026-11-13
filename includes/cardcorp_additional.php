@@ -237,17 +237,69 @@ function add_custom_order_status_icon()
 		}
 
 
+		function cardcorp_log_path()
+		{
+			$uploads = wp_upload_dir(null, false);
+			if (!empty($uploads['error'])) {
+				return false;
+			}
+			$dir = trailingslashit($uploads['basedir']) . 'cardcorp-logs';
+			if (!wp_mkdir_p($dir) || !is_writable($dir)) {
+				return false;
+			}
+			if (!file_exists($dir . '/index.html')) {
+				@file_put_contents($dir . '/index.html', '');
+			}
+			if (!file_exists($dir . '/.htaccess')) {
+				@file_put_contents($dir . '/.htaccess', "Require all denied\nDeny from all\n");
+			}
+			$key = get_option('cardcorp_log_key');
+			if (!is_string($key) || !preg_match('/^[A-Za-z0-9]{32}$/', $key)) {
+				$key = wp_generate_password(32, false, false);
+				add_option('cardcorp_log_key', $key, '', 'no');
+				$key = get_option('cardcorp_log_key');
+			}
+			return $dir . '/cardcorp-' . $key . '.log';
+		}
+
 		function cardcorp_write_log($message)
 		{
 			if (is_array($message)) {
 				$message = json_encode($message);
 			}
-			$file = fopen(plugin_dir_path(__FILE__) . "/../custom_logs.log", "a");
-			fwrite($file, "\n" . date('Y-m-d h:i:s') . " :: " . $message);
+			$path = cardcorp_log_path();
+			$file = $path ? @fopen($path, "a") : false;
+			if ($file === false) {
+				return;
+			}
+			fwrite($file, "\n" . date('Y-m-d H:i:s') . " :: " . $message);
 			fclose($file);
 		}
 
 		function get_cardcorp_logs()
 		{
-			return file_get_contents(plugin_dir_path(__FILE__) . "/../custom_logs.log");
+			$path = cardcorp_log_path();
+			return ($path && is_readable($path)) ? (string) file_get_contents($path) : '';
+		}
+
+		add_action('admin_init', 'cardcorp_migrate_legacy_log');
+		function cardcorp_migrate_legacy_log()
+		{
+			$legacy = plugin_dir_path(__FILE__) . '../custom_logs.log';
+			if (!is_file($legacy)) {
+				return;
+			}
+			$path = cardcorp_log_path();
+			if ($path && !file_exists($path) && @rename($legacy, $path)) {
+				return;
+			}
+			if ($path && file_exists($path)) {
+				$old = @file_get_contents($legacy);
+				if ($old !== false && @file_put_contents($path, "\n--- moved from custom_logs.log " . date('Y-m-d H:i:s') . " ---" . $old, FILE_APPEND) !== false && @unlink($legacy)) {
+					return;
+				}
+			}
+			add_action('admin_notices', function () use ($legacy) {
+				echo '<div class="notice notice-warning"><p>' . esc_html(sprintf('CardCorp: the old log file %s could not be moved. Please delete it, as it may be publicly readable.', $legacy)) . '</p></div>';
+			});
 		}

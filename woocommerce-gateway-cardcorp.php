@@ -1110,7 +1110,7 @@ $.each($(".product-quantity select"), function() {
 					$why = is_wp_error($gtwresponse) ? $gtwresponse->get_error_message() : ($refused ? 'request refused (rate limited)' : 'unreadable response');
 					cardcorp_write_log(sprintf('Checkout %s: payment status not readable: %s', $checkout_id, $why));
 					wc_add_notice('We could not confirm your payment yet. If you have paid, please do not pay again.', 'notice');
-					$found = wc_get_orders(array('limit' => 1, 'meta_query' => array(array('key' => '_cardcorp_checkout_id', 'value' => $checkout_id))));
+					$found = wc_get_orders(array('limit' => 1, 'meta_key' => '_cardcorp_checkout_id', 'meta_value' => $checkout_id));
 					$found = ($found && $found[0]->get_meta('_cardcorp_checkout_id') === $checkout_id) ? $found[0] : null;
 					if ($found) {
 						$found->add_order_note(sprintf('CardCorp payment status for checkout %s could not be read: %s', $checkout_id, $why));

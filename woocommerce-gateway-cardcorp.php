@@ -646,7 +646,8 @@ function init_woocommerce_cardcorp()
 			$checkout = null;
 			$stored_id = (string) $order->get_meta('_cardcorp_checkout_id');
 			$stored = $order->get_meta('_cardcorp_checkout_data');
-			if ($stored_id !== '' && is_array($stored)) {
+			if ($stored_id !== '' && is_array($stored) && $this->cardcorp_valid_payment_id($stored_id)
+				&& isset($stored['integrity']) && is_string($stored['integrity']) && preg_match('#^[A-Za-z0-9+/=-]+$#D', $stored['integrity'])) {
 				$read = wp_remote_post(
 					$this->cardcorp_url . '/v1/checkouts/' . $stored_id . '/payment?entityId=' . $this->ENTITY_ID,
 					array(
@@ -719,7 +720,8 @@ function init_woocommerce_cardcorp()
 				$order->read_meta_data(true);
 				$other_id = (string) $order->get_meta('_cardcorp_checkout_id');
 				$other = $order->get_meta('_cardcorp_checkout_data');
-				if ($other_id !== '' && $other_id !== $stored_id && is_array($other)) {
+				if ($other_id !== '' && $other_id !== $stored_id && is_array($other) && $this->cardcorp_valid_payment_id($other_id)
+					&& isset($other['integrity']) && is_string($other['integrity']) && preg_match('#^[A-Za-z0-9+/=-]+$#D', $other['integrity'])) {
 					$status = (object) array('id' => $other_id, 'integrity' => $other['integrity']);
 				} else {
 					$order->update_meta_data('_cardcorp_checkout_id', $status->id);

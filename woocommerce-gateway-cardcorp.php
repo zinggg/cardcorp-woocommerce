@@ -973,7 +973,11 @@ $.each($(".product-quantity select"), function() {
 							);
 							$order->add_order_note($mismatch_note);
 							cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $mismatch_note));
-							wp_redirect(wc_get_checkout_url());
+							if ($order->needs_payment()) {
+								$order->update_status('on-hold');
+							}
+							wc_add_notice('We received your payment, but it must be checked by the shop. Please do not pay again.', 'notice');
+							wp_redirect($this->get_return_url($order));
 							exit;
 						}
 
@@ -1378,6 +1382,10 @@ $.each($(".product-quantity select"), function() {
 		 */
 		function report_payment($order_id)
 		{
+			if (is_wc_endpoint_url('order-received') && ($o = wc_get_order($order_id)) && $o->get_payment_method() === $this->id
+				&& function_exists('wc_print_notices') && WC()->session) {
+				wc_print_notices();
+			}
 			$url = $this->cardcorp_url . "/v1/query/";
 			if (isset($_REQUEST['astrxId'])) {
 				$astrx_id = $this->cardcorp_valid_payment_id(wp_unslash($_REQUEST['astrxId']));

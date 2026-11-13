@@ -1492,7 +1492,7 @@ $.each($(".product-quantity select"), function() {
 				include_once(dirname(__FILE__) . '/includes/error_list.php');
 				$resp_code = $gwresponse->result->code;
 				$resp_code_translated = array_key_exists($resp_code, $errorMessages) ? $errorMessages[$resp_code] : $gwresponse->result->description;
-				cardcorp_write_log(sprintf('Order %s: %s', $order_id, $resp_code_translated)); ?>
+				cardcorp_write_log($resp_code_translated); ?>
 
 <div class="woocommerce">
     <ul class="woocommerce-error" role="alert">

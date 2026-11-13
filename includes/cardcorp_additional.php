@@ -294,8 +294,18 @@ function add_custom_order_status_icon()
 				return;
 			}
 			if ($path && file_exists($path)) {
-				$old = @file_get_contents($legacy);
-				if ($old !== false && @file_put_contents($path, "\n--- moved from custom_logs.log " . date('Y-m-d H:i:s') . " ---" . $old, FILE_APPEND) !== false && @unlink($legacy)) {
+				// The marker records a finished copy, so a failed delete is retried without appending again
+				$marker = dirname($path) . '/legacy-copied';
+				$copied = file_exists($marker);
+				if (!$copied) {
+					$old = @file_get_contents($legacy);
+					if ($old !== false && @file_put_contents($path, "\n--- moved from custom_logs.log " . date('Y-m-d H:i:s') . " ---" . $old, FILE_APPEND) !== false) {
+						$copied = true;
+						@file_put_contents($marker, '');
+					}
+				}
+				if ($copied && @unlink($legacy)) {
+					@unlink($marker);
 					return;
 				}
 			}

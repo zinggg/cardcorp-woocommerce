@@ -1009,7 +1009,7 @@ $.each($(".product-quantity select"), function() {
 						}
 
 						$existing = (string) $order->get_transaction_id();
-						if ($existing !== '' && $existing !== (string) $status->id) {
+						if ($existing !== '' && $existing !== (string) $status->id && !$order->needs_payment()) {
 							$note = sprintf('CardCorp second payment %s on this order, which is already paid by %s: refund it in the CardCorp back office.', $status->id, $existing);
 							$order->add_order_note($note);
 							cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $note));

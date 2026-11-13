@@ -258,6 +258,14 @@ function add_custom_order_status_icon()
 				$key = wp_generate_password(32, false, false);
 				add_option('cardcorp_log_key', $key, '', 'no');
 				$key = get_option('cardcorp_log_key');
+				if (!is_string($key) || !preg_match('/^[A-Za-z0-9]{32}$/', $key)) {
+					// An invalid key was already stored: replace it
+					update_option('cardcorp_log_key', wp_generate_password(32, false, false), 'no');
+					$key = get_option('cardcorp_log_key');
+					if (!is_string($key) || !preg_match('/^[A-Za-z0-9]{32}$/', $key)) {
+						return false;
+					}
+				}
 			}
 			return $dir . '/cardcorp-' . $key . '.log';
 		}

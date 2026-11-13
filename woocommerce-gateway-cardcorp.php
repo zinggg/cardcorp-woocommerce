@@ -578,7 +578,7 @@ function init_woocommerce_cardcorp()
 
 			/* Required Order Details */
 			$amount 	= $order->get_total();
-			$currency 	= get_woocommerce_currency();
+			$currency 	= $order->get_currency();
 			$url = $this->cardcorp_url . "/v1/checkouts";
 			$customer =  get_current_user_id() != 0 ? get_current_user_id() : $order_id;
 			$data = "entityId=" . $this->ENTITY_ID
@@ -893,7 +893,7 @@ $.each($(".product-quantity select"), function() {
 			if (!isset($status->currency) || !is_string($status->currency)) {
 				return false;
 			}
-			return in_array(strtoupper($status->currency), array(get_woocommerce_currency(), $order->get_currency()), true);
+			return strtoupper($status->currency) === strtoupper($order->get_currency());
 		}
 
 		/**
@@ -989,6 +989,7 @@ $.each($(".product-quantity select"), function() {
 					$order->payment_complete($status->id);
 					$order->update_meta_data('bank_code', $bank_code);
 					$order->update_meta_data('AS-TrxId', $astrxId);
+					$order->update_meta_data('_cardcorp_charged_currency', strtoupper($status->currency));
 					$order->save();
 					WC()->cart->empty_cart();
 
@@ -1068,7 +1069,15 @@ $.each($(".product-quantity select"), function() {
 			$order_data = $order->get_data();
 			$order_trx_id_cardcorp = $order_data['transaction_id'];
 			$amount 	= $order->get_total();
-			$currency 	= get_woocommerce_currency();
+			$currency = (string) $order->get_meta('_cardcorp_charged_currency');
+			if ($currency === '') {
+				if (strtoupper($order->get_currency()) !== strtoupper((string) get_option('woocommerce_currency'))) {
+					$msg = 'Process this order in the CardCorp back office: the currency it was charged in is not recorded.';
+					$order->add_order_note('CardCorp Capture not sent. ' . $msg);
+					return false;
+				}
+				$currency = $order->get_currency();
+			}
 			$response = json_decode($this->capture_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
@@ -1128,7 +1137,15 @@ $.each($(".product-quantity select"), function() {
 			$order_data = $order->get_data();
 			$order_trx_id_cardcorp = $order_data['transaction_id'];
 			$amount 	= $order->get_total();
-			$currency 	= get_woocommerce_currency();
+			$currency = (string) $order->get_meta('_cardcorp_charged_currency');
+			if ($currency === '') {
+				if (strtoupper($order->get_currency()) !== strtoupper((string) get_option('woocommerce_currency'))) {
+					$msg = 'Process this order in the CardCorp back office: the currency it was charged in is not recorded.';
+					$order->add_order_note('CardCorp Reversal not sent. ' . $msg);
+					return false;
+				}
+				$currency = $order->get_currency();
+			}
 			$response = json_decode($this->reverse_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
@@ -1202,7 +1219,15 @@ $.each($(".product-quantity select"), function() {
 			$order_trx_id_cardcorp = $order_data['transaction_id'];
 			$full_refund = $amount === null || $amount === '' || abs((float) $amount - (float) $order->get_total()) < 0.005;
 			$amount 	= $full_refund ? $order->get_total() : number_format((float) $amount, 2, '.', '');
-			$currency 	= get_woocommerce_currency();
+			$currency = (string) $order->get_meta('_cardcorp_charged_currency');
+			if ($currency === '') {
+				if (strtoupper($order->get_currency()) !== strtoupper((string) get_option('woocommerce_currency'))) {
+					$msg = 'Process this order in the CardCorp back office: the currency it was charged in is not recorded.';
+					$order->add_order_note('CardCorp Refund not sent. ' . $msg);
+					return new WP_Error('cardcorp_currency_unknown', $msg);
+				}
+				$currency = $order->get_currency();
+			}
 			$response = json_decode($this->refund_request($order_trx_id_cardcorp, $amount, $currency));
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {

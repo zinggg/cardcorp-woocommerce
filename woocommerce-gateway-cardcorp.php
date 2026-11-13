@@ -569,7 +569,7 @@ function init_woocommerce_cardcorp()
 
 					if ($expiry_last_day_month_unix > $date_now_unix) {
 						$duplicates[] = $token->get_token();
-						$cards .= "&registrations[" . $i . "].id=" . $token->get_token();
+						$cards .= "&registrations[" . $i . "].id=" . urlencode($token->get_token());
 						$i++;
 					}
 				}
@@ -581,19 +581,19 @@ function init_woocommerce_cardcorp()
 			$currency 	= $order->get_currency();
 			$url = $this->cardcorp_url . "/v1/checkouts";
 			$customer =  get_current_user_id() != 0 ? get_current_user_id() : $order_id;
-			$data = "entityId=" . $this->ENTITY_ID
-				. "&currency=" . $currency
-				. "&merchantTransactionId=" . $order->get_id() . rand(1000, 9999)
-				. "&amount=" . $order->get_total()
-				. "&billing.city=" . $order->get_billing_city()
-				. "&billing.country=" . $order->get_billing_country()
-				. "&billing.street1=" . $order->get_billing_address_1() . ' ' . $order->get_billing_address_2()
-				. "&billing.postcode=" . $order->get_billing_postcode()
-				. "&customer.email=" . $order->get_billing_email()
-				. "&customer.phone=" . $order->get_billing_phone()
-				. "&customer.givenName=" . $order->get_billing_first_name()
-				. "&customer.surname=" . $order->get_billing_last_name()
-				. "&customer.merchantCustomerId=" . $customer
+			$data = "entityId=" . urlencode($this->ENTITY_ID)
+				. "&currency=" . urlencode($currency)
+				. "&merchantTransactionId=" . urlencode($order->get_id() . rand(1000, 9999))
+				. "&amount=" . urlencode($order->get_total())
+				. "&billing.city=" . urlencode($order->get_billing_city())
+				. "&billing.country=" . urlencode($order->get_billing_country())
+				. "&billing.street1=" . urlencode($order->get_billing_address_1() . ' ' . $order->get_billing_address_2())
+				. "&billing.postcode=" . urlencode($order->get_billing_postcode())
+				. "&customer.email=" . urlencode($order->get_billing_email())
+				. "&customer.phone=" . urlencode($order->get_billing_phone())
+				. "&customer.givenName=" . urlencode($order->get_billing_first_name())
+				. "&customer.surname=" . urlencode($order->get_billing_last_name())
+				. "&customer.merchantCustomerId=" . urlencode($customer)
 				. "&integrity=true";
 
 			if (!empty($this->merchant_url)) {
@@ -613,11 +613,11 @@ function init_woocommerce_cardcorp()
 				$data .= "&customParameters[3DS2_flow]=challenge"; 
 			};
 
-			$data .= "&paymentType=" . $this->paymentType
-				. "&shipping.city=" . $order->get_shipping_city()
-				. "&shipping.country=" . $order->get_shipping_country()
-				. "&shipping.street1=" . $order->get_shipping_address_1()
-				. "&shipping.postcode=" . $order->get_shipping_postcode()
+			$data .= "&paymentType=" . urlencode($this->paymentType)
+				. "&shipping.city=" . urlencode($order->get_shipping_city())
+				. "&shipping.country=" . urlencode($order->get_shipping_country())
+				. "&shipping.street1=" . urlencode($order->get_shipping_address_1())
+				. "&shipping.postcode=" . urlencode($order->get_shipping_postcode())
 				. $cards;
 
 

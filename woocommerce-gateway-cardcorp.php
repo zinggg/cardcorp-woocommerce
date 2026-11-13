@@ -1212,7 +1212,14 @@ $.each($(".product-quantity select"), function() {
 				}
 				$currency = $order->get_currency();
 			}
-			$response = json_decode($this->capture_request($order_trx_id_cardcorp, $amount, $currency));
+			$raw = $this->capture_request($order_trx_id_cardcorp, $amount, $currency);
+			$response = is_wp_error($raw) ? null : json_decode($raw);
+			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030)/', (string) $response->result->code)) {
+				$msg = 'CardCorp capture outcome unknown: check the back office before retrying';
+				$order->add_order_note($msg);
+				cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $msg));
+				return false;
+			}
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Capture Processed Successful. The Capture ID was %s and Request Status => %s', $response->id, $response->result->description));
@@ -1255,7 +1262,7 @@ $.each($(".product-quantity select"), function() {
 			if (!is_wp_error($gtwresponse)) {
 				return $gtwresponse['body'];
 			}
-			echo 'Error in communication';
+			return $gtwresponse;
 		}
 
 		/**
@@ -1280,7 +1287,14 @@ $.each($(".product-quantity select"), function() {
 				}
 				$currency = $order->get_currency();
 			}
-			$response = json_decode($this->reverse_request($order_trx_id_cardcorp, $amount, $currency));
+			$raw = $this->reverse_request($order_trx_id_cardcorp, $amount, $currency);
+			$response = is_wp_error($raw) ? null : json_decode($raw);
+			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030)/', (string) $response->result->code)) {
+				$msg = 'CardCorp reversal outcome unknown: check the back office before retrying';
+				$order->add_order_note($msg);
+				cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $msg));
+				return false;
+			}
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Reversal Processed Successful. The Reversal ID was: %s and Request Status: %s', $response->id, $response->result->description));
@@ -1323,7 +1337,7 @@ $.each($(".product-quantity select"), function() {
 			if (!is_wp_error($gtwresponse)) {
 				return $gtwresponse['body'];
 			}
-			echo 'Error in communication';
+			return $gtwresponse;
 		}
 
 		/**
@@ -1362,7 +1376,14 @@ $.each($(".product-quantity select"), function() {
 				}
 				$currency = $order->get_currency();
 			}
-			$response = json_decode($this->refund_request($order_trx_id_cardcorp, $amount, $currency));
+			$raw = $this->refund_request($order_trx_id_cardcorp, $amount, $currency);
+			$response = is_wp_error($raw) ? null : json_decode($raw);
+			if (!is_object($response) || !isset($response->result->code) || preg_match('/^(900\.100\.300|000\.400\.030)/', (string) $response->result->code)) {
+				$msg = 'CardCorp refund outcome unknown: check the back office before retrying';
+				$order->add_order_note($msg);
+				cardcorp_write_log(sprintf('Order %s: %s', $order->get_id(), $msg));
+				return new WP_Error('cardcorp_refund_unknown', $msg);
+			}
 			$success_code = array('000.000.000', '000.000.100', '000.100.110', '000.100.111', '000.100.112', '000.300.000');
 			if (in_array($response->result->code, $success_code)) {
 				$order->add_order_note(sprintf('CardCorp Refund Processed Successful. The Refund ID: %s and Request Status: %s', $response->id, $response->result->description));
@@ -1407,7 +1428,7 @@ $.each($(".product-quantity select"), function() {
 			if (!is_wp_error($gtwresponse)) {
 				return $gtwresponse['body'];
 			}
-			echo 'Error in communication';
+			return $gtwresponse;
 		}
 
 

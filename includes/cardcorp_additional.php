@@ -318,6 +318,9 @@ function add_custom_order_status_icon()
 				}
 			}
 			add_action('admin_notices', function () use ($legacy) {
+				if (!current_user_can('manage_woocommerce')) {
+					return;
+				}
 				echo '<div class="notice notice-warning"><p>' . esc_html(sprintf('CardCorp: the old log file %s could not be moved. Please delete it, as it may be publicly readable.', $legacy)) . '</p></div>';
 			});
 		}

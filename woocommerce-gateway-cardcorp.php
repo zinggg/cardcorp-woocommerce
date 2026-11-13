@@ -862,6 +862,9 @@ $.each($(".product-quantity select"), function() {
 					wc_add_notice('Configuration error', 'error');
 					wp_safe_redirect(wc_get_page_permalink('cart'));
 				}
+			} else {
+				cardcorp_write_log(sprintf('Order %s: checkout not created: %s', $order->get_id(), $gtwresponse->get_error_message()));
+				wc_print_notice('We could not reach the payment service. Please reload this page in a minute.', 'error');
 			}
 		}
 

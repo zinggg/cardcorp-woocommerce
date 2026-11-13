@@ -581,18 +581,35 @@ function init_woocommerce_cardcorp()
 			$currency 	= $order->get_currency();
 			$url = $this->cardcorp_url . "/v1/checkouts";
 			$customer =  get_current_user_id() != 0 ? get_current_user_id() : $order_id;
+			$billing_street = $order->get_billing_address_1() . ' ' . $order->get_billing_address_2();
+			$billing_street2 = '';
+			if (mb_strlen($billing_street) > 100) {
+				$billing_street = mb_substr($order->get_billing_address_1(), 0, 100);
+				$billing_street2 = mb_substr($order->get_billing_address_2(), 0, 100);
+			}
+			$billing_postcode = $order->get_billing_postcode();
+			if (mb_strlen($billing_postcode) > 16) {
+				$billing_postcode = preg_replace('/[\s-]+/u', '', $billing_postcode);
+			}
+			$shipping_postcode = $order->get_shipping_postcode();
+			if (mb_strlen($shipping_postcode) > 16) {
+				$shipping_postcode = preg_replace('/[\s-]+/u', '', $shipping_postcode);
+			}
+			$email = $order->get_billing_email();
+			$phone = $order->get_billing_phone();
 			$data = "entityId=" . urlencode($this->ENTITY_ID)
 				. "&currency=" . urlencode($currency)
 				. "&merchantTransactionId=" . urlencode($order->get_id() . rand(1000, 9999))
 				. "&amount=" . urlencode($order->get_total())
-				. "&billing.city=" . urlencode($order->get_billing_city())
+				. "&billing.city=" . urlencode(mb_substr($order->get_billing_city(), 0, 80))
 				. "&billing.country=" . urlencode($order->get_billing_country())
-				. "&billing.street1=" . urlencode($order->get_billing_address_1() . ' ' . $order->get_billing_address_2())
-				. "&billing.postcode=" . urlencode($order->get_billing_postcode())
-				. "&customer.email=" . urlencode($order->get_billing_email())
-				. "&customer.phone=" . urlencode($order->get_billing_phone())
-				. "&customer.givenName=" . urlencode($order->get_billing_first_name())
-				. "&customer.surname=" . urlencode($order->get_billing_last_name())
+				. "&billing.street1=" . urlencode($billing_street)
+				. ($billing_street2 !== '' ? "&billing.street2=" . urlencode($billing_street2) : '')
+				. (mb_strlen($billing_postcode) <= 16 ? "&billing.postcode=" . urlencode($billing_postcode) : '')
+				. (mb_strlen($email) <= 128 ? "&customer.email=" . urlencode($email) : '')
+				. (mb_strlen($phone) <= 25 ? "&customer.phone=" . urlencode($phone) : '')
+				. "&customer.givenName=" . urlencode(mb_substr($order->get_billing_first_name(), 0, 50))
+				. "&customer.surname=" . urlencode(mb_substr($order->get_billing_last_name(), 0, 50))
 				. "&customer.merchantCustomerId=" . urlencode($customer)
 				. "&integrity=true";
 
@@ -614,10 +631,10 @@ function init_woocommerce_cardcorp()
 			};
 
 			$data .= "&paymentType=" . urlencode($this->paymentType)
-				. "&shipping.city=" . urlencode($order->get_shipping_city())
+				. "&shipping.city=" . urlencode(mb_substr($order->get_shipping_city(), 0, 80))
 				. "&shipping.country=" . urlencode($order->get_shipping_country())
-				. "&shipping.street1=" . urlencode($order->get_shipping_address_1())
-				. "&shipping.postcode=" . urlencode($order->get_shipping_postcode())
+				. "&shipping.street1=" . urlencode(mb_substr($order->get_shipping_address_1(), 0, 100))
+				. (mb_strlen($shipping_postcode) <= 16 ? "&shipping.postcode=" . urlencode($shipping_postcode) : '')
 				. $cards;
 
 

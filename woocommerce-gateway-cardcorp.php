@@ -1303,6 +1303,9 @@ $.each($(".product-quantity select"), function() {
 				"&amount=" . $amount .
 				"&currency=" . $currency .
 				"&paymentType=DB";
+			if ($this->operation == 'test') {
+				$data .= "&testMode=EXTERNAL";
+			}
 			$head_data = "Bearer " . $this->ACCESS_TOKEN;
 			$gtwresponse = wp_remote_post(
 				$url,
@@ -1377,6 +1380,9 @@ $.each($(".product-quantity select"), function() {
 				"&amount=" . $amount .
 				"&currency=" . $currency .
 				"&paymentType=RV";
+			if ($this->operation == 'test') {
+				$data .= "&testMode=EXTERNAL";
+			}
 			$head_data = "Bearer " . $this->ACCESS_TOKEN;
 			$gtwresponse = wp_remote_post(
 				$url,
@@ -1467,6 +1473,9 @@ $.each($(".product-quantity select"), function() {
 				"&amount=" . $amount .
 				"&currency=" . $currency .
 				"&paymentType=RF";
+			if ($this->operation == 'test') {
+				$data .= "&testMode=EXTERNAL";
+			}
 			$head_data = "Bearer " . $this->ACCESS_TOKEN;
 			$gtwresponse = wp_remote_post(
 				$url,
